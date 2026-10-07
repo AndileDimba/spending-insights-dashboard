@@ -23,6 +23,8 @@ export default defineConfig({
     environment: 'jsdom',
     include: ['src/**/*.test.{ts,tsx}'],
     setupFiles: ['./src/test/setup.ts'],
+    // Local-time bugs then behave the same on a laptop in Johannesburg and on CI.
+    env: { TZ: 'UTC' },
     restoreMocks: true,
     unstubGlobals: true,
     coverage: {

@@ -1,7 +1,7 @@
 import '@testing-library/jest-dom/vitest'
 
 import { cleanup } from '@testing-library/react'
-import { afterAll, afterEach, beforeAll } from 'vitest'
+import { afterAll, afterEach, beforeAll, vi } from 'vitest'
 
 import { server } from '@/mocks/node'
 
@@ -21,6 +21,7 @@ afterEach(() => {
   // cannot register its own cleanup.
   cleanup()
   server.resetHandlers()
+  vi.useRealTimers()
 
   const unexpected = unhandledRequests.splice(0)
   if (unexpected.length > 0) {
