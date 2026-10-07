@@ -60,4 +60,4 @@ Only after every must have is polished.
 
 - [#28](https://github.com/AndileDimba/spending-insights-dashboard/issues/28) Merchant search (needs a contract extension, see the issue)
 - [#29](https://github.com/AndileDimba/spending-insights-dashboard/issues/29) CSV export of filtered transactions, with formula injection protection
-- [#30](https://github.com/AndileDimba/spending-insights-dashboard/issues/30) Spring Boot API implementing the same contract
+- [#30](https://github.com/AndileDimba/spending-insights-dashboard/issues/30) ASP.NET Core API implementing the same contract, run with the frontend through Docker Compose (see [ADR 0004](adr/0004-reference-backend-in-aspnet-core.md))
