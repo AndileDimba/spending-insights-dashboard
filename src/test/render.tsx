@@ -22,11 +22,11 @@ export function renderWithProviders(
   const router = createMemoryRouter([{ path: '*', element: ui }], { initialEntries: [route] })
   const user = userEvent.setup()
 
-  const result = render(
+  const view = render(
     <QueryClientProvider client={queryClient}>
       <RouterProvider router={router} />
     </QueryClientProvider>,
   )
 
-  return { ...result, user, router, queryClient }
+  return { ...view, user, router, queryClient }
 }

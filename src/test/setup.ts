@@ -1,5 +1,9 @@
 import '@testing-library/jest-dom/vitest'
 
+// Testing Library only cleans up automatically when the runner exposes a
+// global afterEach. Vitest globals are off (explicit imports read better),
+// so cleanup is registered by hand below.
+// eslint-disable-next-line testing-library/no-manual-cleanup -- see above
 import { cleanup } from '@testing-library/react'
 import { afterAll, afterEach, beforeAll, vi } from 'vitest'
 
@@ -17,8 +21,6 @@ beforeAll(() => {
 })
 
 afterEach(() => {
-  // Vitest globals are off (explicit imports read better), so Testing Library
-  // cannot register its own cleanup.
   cleanup()
   server.resetHandlers()
   vi.useRealTimers()

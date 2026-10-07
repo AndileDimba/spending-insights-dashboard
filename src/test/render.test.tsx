@@ -39,10 +39,10 @@ describe('renderWithProviders', () => {
   })
 
   it('gives each test a query client that does not retry failed queries', () => {
-    const first = renderWithProviders(<PeriodEcho />)
-    const second = renderWithProviders(<PeriodEcho />)
+    const { queryClient: firstClient } = renderWithProviders(<PeriodEcho />)
+    const { queryClient: secondClient } = renderWithProviders(<PeriodEcho />)
 
-    expect(first.queryClient.getDefaultOptions().queries?.retry).toBe(false)
-    expect(first.queryClient).not.toBe(second.queryClient)
+    expect(firstClient.getDefaultOptions().queries?.retry).toBe(false)
+    expect(firstClient).not.toBe(secondClient)
   })
 })
