@@ -20,7 +20,7 @@ We follow the "testing trophy": most confidence comes from integration-level com
 | Unit | Vitest | Pure logic is correct at the edges | Currency and date formatting, period to date range, category sorting, URL query parsing, the seeded data generator |
 | Contract | Vitest + Zod | Our schemas match the API contract, and the mocks match our schemas | Every example in [`api-spec.md`](./brief/api-spec.md) parses; every MSW response parses; malformed payloads are rejected |
 | Component | Vitest + React Testing Library + user-event + MSW | A feature works for a user, in all four states | Category breakdown shows loading, empty, error with retry, and success; changing the period refetches and updates the URL |
-| Accessibility | vitest-axe, @axe-core/playwright | No detectable WCAG violations | Axe runs in every component test of a view, and on every page in e2e |
+| Accessibility | axe-core (`expectNoAccessibilityViolations`), @axe-core/playwright | No detectable WCAG violations | Axe runs in every component test of a view, and on every page in e2e |
 | End-to-end | Playwright against the Docker image | Critical journeys work in a real browser behind real nginx | Open dashboard, change period, filter and paginate transactions, deep link with filters, keyboard only journey |
 | Mutation | Stryker | The tests catch faults, not just execute lines | Runs on `src/shared/lib` and `src/shared/api` |
 
@@ -75,4 +75,21 @@ Thresholds are set slightly below the current level when they are introduced and
 - Test files sit next to the code they test: `CategoryBreakdown.tsx` and `CategoryBreakdown.test.tsx`.
 - Describe blocks name the unit or feature; test names read as acceptance criteria: `it('shows categories sorted by amount, largest first')`.
 - Query priority follows Testing Library guidance: `getByRole`, then `getByLabelText`, then `getByText`. `getByTestId` is a last resort, and needs a comment explaining why.
-- No `waitFor` around `getBy` queries. Use `findBy` instead.
+- No `waitFor` around `getBy` queries. Use `findBy` instead. `eslint-plugin-testing-library` enforces this and the query conventions above.
+
+## Test helpers
+
+All in `src/test/`, each with its own tests:
+
+| Helper | Use it to |
+| --- | --- |
+| `renderWithProviders(ui, { route })` | Render with the router and a fresh query client. Returns `user` for interactions and `router` to assert URL state, e.g. `router.state.location.search` |
+| `expectNoAccessibilityViolations(container)` | Run axe on rendered output. Fails with each rule id and a link |
+| `fixClock('2024-09-16T12:00:00Z')` | Fix "now" for date logic. Only `Date` is faked, so timers and user events still work |
+| `server.use(...)` from `@/mocks/node` | Override API responses for one test: empty, error, slow or malformed |
+
+Every test also runs with these guarantees, set up in `src/test/setup.ts` and `vite.config.ts`:
+
+- A network request with no handler fails the test, even if the code under test catches the error.
+- Tests run in UTC, so a local-time bug behaves the same on every machine.
+- The DOM, handlers, mocks and the clock are reset after each test.

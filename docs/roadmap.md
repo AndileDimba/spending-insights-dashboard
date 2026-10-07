@@ -10,7 +10,7 @@ Work is planned as GitHub issues and delivered one branch and one PR at a time. 
 | [#2](https://github.com/AndileDimba/spending-insights-dashboard/issues/2) | `docs/2-adrs-stack-decisions` | ADRs for stack, folder architecture (feature folders over Feature-Sliced Design), state management, mocking (including MSW in the Docker image), styling |
 | [#3](https://github.com/AndileDimba/spending-insights-dashboard/issues/3) | `chore/3-scaffold-vite-react-ts` | Vite, React, TypeScript strict, path aliases, folder structure |
 | [#4](https://github.com/AndileDimba/spending-insights-dashboard/issues/4) | `chore/4-lint-format-hooks` | ESLint, Prettier, lint-staged wired into `.githooks/pre-commit` |
-| [#5](https://github.com/AndileDimba/spending-insights-dashboard/issues/5) | `test/5-vitest-rtl-setup` | Vitest, React Testing Library, user-event, vitest-axe, MSW test server, fixed clock, coverage thresholds |
+| [#5](https://github.com/AndileDimba/spending-insights-dashboard/issues/5) | `test/5-vitest-rtl-setup` | Vitest, React Testing Library, user-event, axe-core assertion, MSW test server, fixed clock, coverage thresholds |
 | [#6](https://github.com/AndileDimba/spending-insights-dashboard/issues/6) | `ci/6-github-actions` | Lint, typecheck, test, build on every PR |
 | [#7](https://github.com/AndileDimba/spending-insights-dashboard/issues/7) | `build/7-dockerfile-nginx` | Multi-stage Dockerfile, unprivileged nginx, security headers, CSP |
 | [#8](https://github.com/AndileDimba/spending-insights-dashboard/issues/8) | `ci/8-security-scanning` | Dependabot, CodeQL, `npm audit` gate, Trivy image scan, `SECURITY.md`, `CODEOWNERS` |
