@@ -6,6 +6,7 @@ import jsxA11y from 'eslint-plugin-jsx-a11y'
 import reactHooks from 'eslint-plugin-react-hooks'
 import reactRefresh from 'eslint-plugin-react-refresh'
 import simpleImportSort from 'eslint-plugin-simple-import-sort'
+import testingLibrary from 'eslint-plugin-testing-library'
 import globals from 'globals'
 import tseslint from 'typescript-eslint'
 
@@ -148,6 +149,12 @@ export default defineConfig([
   {
     files: ['src/**/*.tsx'],
     extends: [jsxA11y.flatConfigs.strict, reactRefresh.configs.vite],
+  },
+
+  {
+    // Enforces the query and async conventions in docs/testing-strategy.md.
+    files: TEST_FILES,
+    extends: [testingLibrary.configs['flat/react']],
   },
 
   ...boundaryConfigs(),

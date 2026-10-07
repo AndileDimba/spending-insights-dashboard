@@ -26,10 +26,13 @@ npm run preview   # serve the production build locally
 | Fix lint issues that can be fixed automatically | `npm run lint:fix` |
 | Format | `npm run format` |
 | Check formatting | `npm run format:check` |
+| Tests | `npm test` |
+| Tests in watch mode (for TDD) | `npm run test:watch` |
+| Tests with coverage report (`coverage/index.html`) | `npm run test:coverage` |
 | Production build | `npm run build` |
 | Preview the production build | `npm run preview` |
 
-Tests and Docker commands are added by the issues that introduce them (see the [roadmap](docs/roadmap.md)).
+End-to-end and Docker commands are added by the issues that introduce them (see the [roadmap](docs/roadmap.md)).
 
 ## Project documentation
 

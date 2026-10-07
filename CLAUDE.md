@@ -34,7 +34,7 @@ Source material lives in `docs/brief/`:
 | Charts | Recharts, each chart with an accessible table or text alternative | [ADR 0011](docs/adr/0011-recharts-with-accessible-alternatives.md) |
 | Styling | CSS Modules with design tokens as CSS custom properties | [ADR 0010](docs/adr/0010-css-modules-and-design-tokens.md) |
 | Unit / component tests | Vitest + React Testing Library + `@testing-library/user-event` | [ADR 0003](docs/adr/0003-test-driven-development.md) |
-| Accessibility tests | `vitest-axe` / `@axe-core/playwright` | [ADR 0003](docs/adr/0003-test-driven-development.md) |
+| Accessibility tests | `axe-core` via `src/test/axe.ts` / `@axe-core/playwright` | [ADR 0003](docs/adr/0003-test-driven-development.md) |
 | End-to-end tests | Playwright | [ADR 0003](docs/adr/0003-test-driven-development.md) |
 | Mutation tests | Stryker (on `src/shared/lib` and `src/shared/api`) | [ADR 0003](docs/adr/0003-test-driven-development.md) |
 | Lint / format | ESLint (typescript-eslint, react-hooks, jsx-a11y) + Prettier | Tooling, no ADR |
@@ -138,6 +138,7 @@ These are added as the project is scaffolded. Keep this table up to date.
 | Check formatting | `npm run format:check` |
 | Typecheck | `npm run typecheck` |
 | Unit tests | `npm test` |
+| Tests in watch mode | `npm run test:watch` |
 | Coverage | `npm run test:coverage` |
 | E2E tests | `npm run test:e2e` |
 | Production build | `npm run build` |
