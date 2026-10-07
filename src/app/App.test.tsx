@@ -1,6 +1,8 @@
 import { render, screen } from '@testing-library/react'
 import { describe, expect, it } from 'vitest'
 
+import { expectNoAccessibilityViolations } from '@/test/axe'
+
 import { App } from './App'
 
 describe('App', () => {
@@ -8,5 +10,11 @@ describe('App', () => {
     render(<App />)
 
     expect(screen.getByRole('heading', { level: 1, name: 'Spending Insights' })).toBeInTheDocument()
+  })
+
+  it('has no detectable accessibility violations', async () => {
+    const { container } = render(<App />)
+
+    await expectNoAccessibilityViolations(container)
   })
 })
