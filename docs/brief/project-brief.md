@@ -64,4 +64,4 @@ The contract is in [`api-spec.md`](./api-spec.md). Seven endpoints:
 
 ### Could have (only after must haves are polished)
 
-- A small Spring Boot API implementing the same contract (Java is a nice to have for the role)
+- A small ASP.NET Core API implementing the same contract. Java is the nice to have in the job description; [ADR 0004](../adr/0004-reference-backend-in-aspnet-core.md) explains why .NET was chosen instead

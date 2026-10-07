@@ -56,6 +56,6 @@ Work is planned as GitHub issues and delivered one branch and one PR at a time. 
 
 ## Stretch
 
-- Spring Boot API implementing the same contract (separate folder or repository)
+- ASP.NET Core API implementing the same contract, run with the frontend through Docker Compose (see [ADR 0004](adr/0004-reference-backend-in-aspnet-core.md))
 - CSV export of filtered transactions
 - Merchant search
