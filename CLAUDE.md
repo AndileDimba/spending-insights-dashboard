@@ -135,6 +135,7 @@ These are added as the project is scaffolded. Keep this table up to date.
 | Dev server (with MSW) | `npm run dev` |
 | Lint | `npm run lint` |
 | Format | `npm run format` |
+| Check formatting | `npm run format:check` |
 | Typecheck | `npm run typecheck` |
 | Unit tests | `npm test` |
 | Coverage | `npm run test:coverage` |
