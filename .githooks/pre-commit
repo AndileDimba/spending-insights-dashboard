@@ -1,0 +1,31 @@
+#!/bin/sh
+# Blocks commits on protected branches and enforces branch naming.
+# See CONTRIBUTING.md. Do not bypass with --no-verify.
+
+branch="$(git symbolic-ref --short HEAD 2>/dev/null)"
+
+case "$branch" in
+  main|develop)
+    echo "ERROR: direct commits to '$branch' are not allowed."
+    echo "Create a branch, e.g.: git switch -c feature/<issue>-<short-name>"
+    exit 1
+    ;;
+esac
+
+pattern='^((feature|bugfix|chore|docs|ci|build|perf|refactor|test)/([0-9]+-)?[a-z0-9]+(-[a-z0-9]+)*|release/[0-9]+\.[0-9]+\.[0-9]+|hotfix/[0-9]+\.[0-9]+\.[0-9]+-[a-z0-9]+(-[a-z0-9]+)*)$'
+
+if ! echo "$branch" | grep -Eq "$pattern"; then
+  echo "ERROR: branch name '$branch' does not follow the convention."
+  echo "Expected one of:"
+  echo "  feature/<issue>-<short-name>   bugfix/<issue>-<short-name>"
+  echo "  chore|docs|ci|build|perf|refactor|test/<issue>-<short-name>"
+  echo "  release/<x.y.z>                hotfix/<x.y.z>-<short-name>"
+  exit 1
+fi
+
+# Run lint-staged once the Node toolchain exists.
+if [ -f package.json ] && [ -d node_modules/lint-staged ]; then
+  npx --no-install lint-staged || exit 1
+fi
+
+exit 0

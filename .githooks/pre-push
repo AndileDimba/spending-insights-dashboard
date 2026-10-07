@@ -1,0 +1,19 @@
+#!/bin/sh
+# Blocks pushes to protected branches. Changes reach main and develop via PRs.
+# The one-time bootstrap in scripts/init-repo.ps1 sets ALLOW_PROTECTED_PUSH=1.
+
+if [ "$ALLOW_PROTECTED_PUSH" = "1" ]; then
+  exit 0
+fi
+
+while read -r local_ref local_sha remote_ref remote_sha; do
+  case "$remote_ref" in
+    refs/heads/main|refs/heads/develop)
+      echo "ERROR: pushing directly to '${remote_ref#refs/heads/}' is not allowed."
+      echo "Push your branch and open a pull request instead."
+      exit 1
+      ;;
+  esac
+done
+
+exit 0
