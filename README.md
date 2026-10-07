@@ -6,7 +6,26 @@ A responsive financial analytics dashboard that shows a customer's spending: sum
 
 ## Quick start
 
-_Build, run and test instructions are added as the project is scaffolded._
+Prerequisites: Node.js 24 (see `.nvmrc`) and npm 11. Installs fail on other Node versions on purpose (`engine-strict`).
+
+```bash
+npm ci            # install exactly what the lockfile specifies
+npm run dev       # development server at http://localhost:5173
+npm run build     # typecheck and production build into dist/
+npm run preview   # serve the production build locally
+```
+
+## Commands
+
+| Task | Command |
+| --- | --- |
+| Install | `npm ci` |
+| Development server | `npm run dev` |
+| Typecheck | `npm run typecheck` |
+| Production build | `npm run build` |
+| Preview the production build | `npm run preview` |
+
+Linting, tests and Docker commands are added by the issues that introduce them (see the [roadmap](docs/roadmap.md)).
 
 ## Project documentation
 

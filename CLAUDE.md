@@ -140,6 +140,7 @@ These are added as the project is scaffolded. Keep this table up to date.
 | Coverage | `npm run test:coverage` |
 | E2E tests | `npm run test:e2e` |
 | Production build | `npm run build` |
+| Preview production build | `npm run preview` |
 | Docker build | `docker build -t spending-insights .` |
 | Docker run | `docker run --rm -p 8080:8080 spending-insights` |
 

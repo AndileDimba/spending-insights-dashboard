@@ -37,7 +37,7 @@ The first three are Google's Core Web Vitals "good" thresholds. The bundle budge
 
 | ID | Requirement | Verified by |
 | --- | --- | --- |
-| B1 | Last two major versions of Chrome, Edge, Firefox and Safari, plus iOS Safari 16 or later and Samsung Internet | Browserslist config (#3), e2e on Chromium and WebKit (#23) |
+| B1 | Browsers in Baseline Widely Available: Chrome and Edge 111+, Firefox 114+, Safari and iOS Safari 16.4+, and Chromium-based browsers such as Samsung Internet of the same vintage | Vite `build.target` in `vite.config.ts` (#3), e2e on Chromium and WebKit (#23) |
 | B2 | Viewports from 320px to 1920px wide, portrait and landscape | e2e mobile and desktop projects (#23) |
 | B3 | No horizontal page scroll at any supported width | e2e assertion (#13, #23) |
 
