@@ -23,8 +23,14 @@ if ! echo "$branch" | grep -Eq "$pattern"; then
   exit 1
 fi
 
-# Run lint-staged once the Node toolchain exists.
-if [ -f package.json ] && [ -d node_modules/lint-staged ]; then
+# Lint, format and typecheck staged files. Missing dependencies are an error,
+# not a reason to skip the checks.
+if [ -f package.json ]; then
+  if [ ! -d node_modules/lint-staged ]; then
+    echo "ERROR: dependencies are not installed, so staged files cannot be checked."
+    echo "Run: npm ci"
+    exit 1
+  fi
   npx --no-install lint-staged || exit 1
 fi
 

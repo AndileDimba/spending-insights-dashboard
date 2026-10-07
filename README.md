@@ -22,10 +22,14 @@ npm run preview   # serve the production build locally
 | Install | `npm ci` |
 | Development server | `npm run dev` |
 | Typecheck | `npm run typecheck` |
+| Lint (zero warnings allowed) | `npm run lint` |
+| Fix lint issues that can be fixed automatically | `npm run lint:fix` |
+| Format | `npm run format` |
+| Check formatting | `npm run format:check` |
 | Production build | `npm run build` |
 | Preview the production build | `npm run preview` |
 
-Linting, tests and Docker commands are added by the issues that introduce them (see the [roadmap](docs/roadmap.md)).
+Tests and Docker commands are added by the issues that introduce them (see the [roadmap](docs/roadmap.md)).
 
 ## Project documentation
 

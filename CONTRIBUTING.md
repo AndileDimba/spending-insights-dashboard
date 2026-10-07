@@ -163,5 +163,8 @@ Breaking changes add `!` after the type (`feat(api)!: ...`) and a `BREAKING CHAN
 - blocks pushes to `main` and `develop`
 - rejects branch names that do not follow the convention
 - rejects commit messages that are not Conventional Commits
+- lints (zero warnings), formats and typechecks staged files with lint-staged, and refuses to commit if dependencies are not installed
+
+ESLint also enforces the architecture boundaries from [ADR 0006](docs/adr/0006-feature-folders.md): relative imports stay inside their own feature or shared segment, and imports flow from `app` to `features` to `shared`. If the linter blocks an import, the fix is usually to import from a feature's `index.ts` or to move shared code into `src/shared/`.
 
 On GitHub, protect `main` and `develop`: require a pull request, require status checks to pass, disallow force pushes and deletions.
