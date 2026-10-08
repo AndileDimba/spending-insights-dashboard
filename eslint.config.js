@@ -109,6 +109,12 @@ export default defineConfig([
         'error',
         { considerDefaultExhaustiveForUnions: false },
       ],
+      // A leading underscore marks a parameter as intentionally unused, and a
+      // property taken out only to omit it from a rest object is not "unused".
+      '@typescript-eslint/no-unused-vars': [
+        'error',
+        { argsIgnorePattern: '^_', ignoreRestSiblings: true },
+      ],
       eqeqeq: ['error', 'always'],
       'no-console': 'error',
     },
