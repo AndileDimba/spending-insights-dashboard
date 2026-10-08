@@ -73,14 +73,9 @@ We work test-first. Read [ADR 0003](docs/adr/0003-test-driven-development.md) an
 
 ## API assumptions
 
-The spec has gaps. When you hit one, do not guess silently. Make a decision, implement it, and record it in `docs/api-assumptions.md` with: the gap, the decision, and the reasoning. Known gaps so far:
+The spec has gaps. Every known gap is decided in [`docs/api-assumptions.md`](docs/api-assumptions.md) (A1 to A19), with the reasoning and the question for the backend. Read it before writing schemas, mocks or any view that shows API data, and cite decisions by ID in code comments and test names where it helps (for example `// A7: refunds are negative amounts`).
 
-- Categories in the example are not sorted by amount (Utilities R458.70 listed after Shopping R450.80). The UI sorts; it does not trust response order.
-- `period` and `startDate`/`endDate` can both be sent to `/spending/categories`. Precedence is unspecified.
-- `currency` only exists on the profile, not on amounts.
-- Trends default to 12 months but the example returns 6, and trend months do not overlap the category date range.
-- No error response shape, no auth, no refunds or negative amounts are documented.
-- `customerId` source is unspecified (assume a single mocked signed-in customer).
+When you hit a new gap, do not guess silently. Make a decision, implement it, and add it to that document with the next ID: the gap, the decision, the reasoning and the question for the backend.
 
 ## Git workflow (mandatory)
 
