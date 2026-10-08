@@ -78,3 +78,8 @@ updates:
       prefix: build
       include: scope
     labels: [build]
+    ignore:
+      # The Node major is declared in .nvmrc, package.json engines and here,
+      # and moves to a new LTS line by hand in all three at once (#42).
+      - dependency-name: node
+        update-types: [version-update:semver-major]
