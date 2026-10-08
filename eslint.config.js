@@ -109,6 +109,8 @@ export default defineConfig([
         'error',
         { considerDefaultExhaustiveForUnions: false },
       ],
+      // A leading underscore marks a parameter as intentionally unused.
+      '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
       eqeqeq: ['error', 'always'],
       'no-console': 'error',
     },
