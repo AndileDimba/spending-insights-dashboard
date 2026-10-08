@@ -67,6 +67,7 @@ End-to-end commands are added by the issue that introduces them (see the [roadma
 | [`docs/adr/`](docs/adr/README.md) | Architecture decision records, with an index |
 | [`docs/roadmap.md`](docs/roadmap.md) | Delivery plan |
 | [`CONTRIBUTING.md`](CONTRIBUTING.md) | Branching, commits and pull requests |
+| [`SECURITY.md`](SECURITY.md) | Reporting a vulnerability, and the protections in place |
 | [`CHANGELOG.md`](CHANGELOG.md) | Release history |
 
 ## Licence
