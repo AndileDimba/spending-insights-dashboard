@@ -170,15 +170,9 @@ Breaking changes add `!` after the type (`feat(api)!: ...`) and a `BREAKING CHAN
 
 Every dependency is code we ship or run, so it needs a reason. In the PR, say why it is needed and why existing code or the platform is not enough. If it is a meaningful architectural choice, add an ADR.
 
-- Versions are saved exactly ( in ) and the lockfile is committed.
-- Unknown command: "audit"
-
-
-Did you mean this?
-  npm audit # Run a security audit
-To see a list of supported npm commands, run:
-  npm help must stay clean at high and critical severity. CI enforces this.
-- Install scripts from dependencies are blocked by default (npm 11.19 and later) and are not run in CI. If a new dependency has one, decide explicitly:  if it is not needed, or  with the reason in the PR. The decision is recorded in  in .
+- Versions are saved exactly (`save-exact` in `.npmrc`) and the lockfile is committed.
+- `npm audit` must stay clean at high and critical severity. CI enforces this.
+- Install scripts from dependencies are blocked by default (npm 11.19 and later) and are not run in CI. If a new dependency has one, decide explicitly: `npm install-scripts deny <pkg>` if it is not needed, or `npm install-scripts approve <pkg>` with the reason in the PR. The decision is recorded in `allowScripts` in `package.json`.
 
 ## Versioning
 
