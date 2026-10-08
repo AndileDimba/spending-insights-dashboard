@@ -89,3 +89,30 @@ jobs:
           cache: npm
       - run: npm ci --ignore-scripts
       - run: npm run build
+
+  docker:
+    name: Docker image
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Build image
+        run: docker build -t spending-insights:ci .
+      # Run the way a hardened platform would, so the smoke test proves the
+      # image works without root, capabilities or a writable filesystem.
+      - name: Start container
+        run: >-
+          docker run -d --name app -p 8080:8080
+          --read-only --tmpfs /tmp --cap-drop ALL --security-opt no-new-privileges
+          spending-insights:ci
+      - name: Wait until healthy
+        run: timeout 60 sh -c 'until [ "$(docker inspect app --format "{{.State.Health.Status}}")" = healthy ]; do sleep 1; done'
+      - name: Check it runs as non-root
+        run: test "$(docker exec app id -u)" != 0
+      - name: Smoke test
+        run: sh scripts/docker-smoke-test.sh http://localhost:8080
+      - name: Show container logs
+        if: failure()
+        run: docker logs app
