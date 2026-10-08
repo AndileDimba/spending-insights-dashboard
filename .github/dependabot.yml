@@ -34,13 +34,9 @@ updates:
         dependency-type: development
         update-types: [minor, patch]
     ignore:
-      # Held back on purpose until their ecosystems catch up; see PR #34
-      # (TypeScript 7) and PR #35 (ESLint 10 and jsx-a11y). Upgraded by hand.
+      # Held back on purpose until the tooling supports it; see PR #34.
+      # Upgraded by hand.
       - dependency-name: typescript
-        update-types: [version-update:semver-major]
-      - dependency-name: eslint
-        update-types: [version-update:semver-major]
-      - dependency-name: '@eslint/js'
         update-types: [version-update:semver-major]
       # Node types follow the runtime pinned in .nvmrc, not the newest Node.
       - dependency-name: '@types/node'
