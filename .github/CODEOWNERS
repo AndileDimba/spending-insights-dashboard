@@ -1,0 +1,21 @@
+# Owners are requested for review automatically when these paths change.
+# Paths that affect security are listed separately, so that adding a security
+# reviewer later means editing one line.
+
+*                     @AndileDimba
+
+# Delivery pipeline and its trust settings
+/.github/             @AndileDimba
+/.githooks/           @AndileDimba
+
+# Runtime and its security headers
+/Dockerfile           @AndileDimba
+/.dockerignore        @AndileDimba
+/nginx/               @AndileDimba
+
+# The API boundary: validation of untrusted data
+/src/shared/api/      @AndileDimba
+
+# Security policy and threat model
+/SECURITY.md          @AndileDimba
+/docs/discovery/threat-model.md  @AndileDimba
