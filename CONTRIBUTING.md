@@ -148,7 +148,14 @@ Breaking changes add `!` after the type (`feat(api)!: ...`) and a `BREAKING CHAN
 
 - One concern per PR. Aim for under 400 changed lines.
 - Fill in the PR template completely, including screenshots for UI changes (mobile and desktop).
-- CI must pass: lint, typecheck, unit tests, Docker build, and e2e tests once they are added (milestone 4).
+- CI must pass. [`.github/workflows/ci.yml`](.github/workflows/ci.yml) runs these as required checks on every PR:
+  - **PR conventions:** the title is a Conventional Commit (it becomes the squash commit message) and the branch name follows the convention
+  - **Lint and format:** `npm run lint` and `npm run format:check`
+  - **Typecheck:** `npm run typecheck`
+  - **Unit tests:** `npm run test:coverage`, with the coverage report attached to the run
+  - **Build:** `npm run build`
+
+  The Docker build, security scans and e2e tests join as their issues land (#7, #8, #23).
 - Review your own diff on GitHub before requesting review. Leave comments on anything a reviewer might question.
 
 ## Versioning
