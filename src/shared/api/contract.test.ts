@@ -1,8 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import type { ZodType } from 'zod'
 
-// Read straight from the spec, so the examples can never drift from it.
-import apiSpec from '/docs/brief/api-spec.md?raw'
+import { examplesFromSpec } from '@/test/api-spec'
 
 import {
   categoriesSchema,
@@ -13,18 +12,6 @@ import {
   transactionsSchema,
   trendsSchema,
 } from './schemas'
-
-/** Returns the JSON example under each numbered "## N. Title" heading, by number. */
-function examplesFromSpec(markdown: string): Map<number, unknown> {
-  const examples = new Map<number, unknown>()
-  for (const section of markdown.split(/^## (?=\d+\.)/m).slice(1)) {
-    const number = Number.parseInt(section, 10)
-    // The last example in the spec has no closing fence, so end of file also ends a block.
-    const json = /```json\s*\n([\s\S]*?)(?:```|$)/.exec(section)?.[1]
-    if (json !== undefined) examples.set(number, JSON.parse(json))
-  }
-  return examples
-}
 
 const endpoints: [number, string, ZodType][] = [
   [1, 'profile', profileSchema],
@@ -37,7 +24,7 @@ const endpoints: [number, string, ZodType][] = [
 ]
 
 describe('API contract', () => {
-  const examples = examplesFromSpec(apiSpec)
+  const examples = examplesFromSpec()
 
   it('finds an example response for every endpoint in the spec', () => {
     expect([...examples.keys()]).toEqual([1, 2, 3, 4, 5, 6, 7])
