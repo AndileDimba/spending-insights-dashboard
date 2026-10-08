@@ -154,8 +154,16 @@ Breaking changes add `!` after the type (`feat(api)!: ...`) and a `BREAKING CHAN
   - **Typecheck:** `npm run typecheck`
   - **Unit tests:** `npm run test:coverage`, with the coverage report attached to the run
   - **Build:** `npm run build`
+  - **Docker image:** builds the image, runs it read-only as non-root and runs `scripts/docker-smoke-test.sh`
 
-  The Docker build, security scans and e2e tests join as their issues land (#7, #8, #23).
+  [`.github/workflows/security.yml`](.github/workflows/security.yml) adds, on every PR and weekly:
+  - **Dependency audit:** `npm audit --audit-level=high` and `npm audit signatures`
+  - **CodeQL:** security analysis of the TypeScript and of the workflows
+  - **Image scan:** Trivy fails on fixable high or critical vulnerabilities and reports all findings to the Security tab
+
+  E2E tests join in #23.
+
+  Found a vulnerability? Follow [`SECURITY.md`](SECURITY.md), not a public issue.
 - Review your own diff on GitHub before requesting review. Leave comments on anything a reviewer might question.
 
 ## Versioning
