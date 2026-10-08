@@ -17,6 +17,23 @@ npm run build     # typecheck and production build into dist/
 npm run preview   # serve the production build locally
 ```
 
+## Run with Docker
+
+The image builds the app and serves it from unprivileged nginx on port 8080 ([ADR 0012](docs/adr/0012-unprivileged-nginx-runtime.md)).
+
+```bash
+docker build -t spending-insights .
+docker run --rm -p 8080:8080 spending-insights
+```
+
+Then open http://localhost:8080. The container works unchanged under the restrictions a hardened platform applies, which is how CI runs it:
+
+```bash
+docker run --rm -p 8080:8080 --read-only --tmpfs /tmp   --cap-drop ALL --security-opt no-new-privileges spending-insights
+```
+
+To check a running container (headers, caching, deep links, health), run `sh scripts/docker-smoke-test.sh http://localhost:8080`.
+
 ## Commands
 
 | Task | Command |
@@ -34,7 +51,7 @@ npm run preview   # serve the production build locally
 | Production build | `npm run build` |
 | Preview the production build | `npm run preview` |
 
-End-to-end and Docker commands are added by the issues that introduce them (see the [roadmap](docs/roadmap.md)).
+End-to-end commands are added by the issue that introduces them (see the [roadmap](docs/roadmap.md)).
 
 ## Project documentation
 
