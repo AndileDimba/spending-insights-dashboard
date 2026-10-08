@@ -1,0 +1,42 @@
+name: PR conventions
+
+# Separate from CI so that renaming a PR re-checks its title without
+# re-running the whole pipeline.
+on:
+  pull_request:
+    branches: [develop, main]
+    types: [opened, edited, synchronize, reopened]
+
+permissions: {}
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  conventions:
+    name: PR conventions
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      # The PR title becomes the squash commit message, so it must follow
+      # Conventional Commits like every other commit. Values are passed through
+      # env, never interpolated into the script, so a crafted title or branch
+      # name cannot inject shell commands.
+      - name: Check PR title and branch name
+        env:
+          PR_TITLE: ${{ github.event.pull_request.title }}
+          HEAD_REF: ${{ github.head_ref }}
+        run: |
+          title_pattern='^(feat|fix|docs|style|refactor|perf|test|build|ci|chore|revert)(\([a-z0-9-]+\))?!?: .{1,72}$'
+          branch_pattern='^((feature|bugfix|chore|docs|ci|build|perf|refactor|test)/([0-9]+-)?[a-z0-9]+(-[a-z0-9]+)*|release/[0-9]+\.[0-9]+\.[0-9]+|hotfix/[0-9]+\.[0-9]+\.[0-9]+-[a-z0-9]+(-[a-z0-9]+)*|dependabot/.+)$'
+          status=0
+          if ! printf '%s' "$PR_TITLE" | grep -Eq "$title_pattern"; then
+            echo "::error::PR title is not a Conventional Commit: <type>(<scope>): <summary of at most 72 chars>"
+            status=1
+          fi
+          if ! printf '%s' "$HEAD_REF" | grep -Eq "$branch_pattern"; then
+            echo "::error::Branch name does not follow CONTRIBUTING.md, e.g. feature/12-transactions-table"
+            status=1
+          fi
+          exit "$status"

@@ -1,5 +1,7 @@
 # Customer Spending Insights Dashboard
 
+[![CI](https://github.com/AndileDimba/spending-insights-dashboard/actions/workflows/ci.yml/badge.svg?branch=develop)](https://github.com/AndileDimba/spending-insights-dashboard/actions/workflows/ci.yml)
+
 A responsive financial analytics dashboard that shows a customer's spending: summary, category breakdown, monthly trends, transactions and budget goals.
 
 > Status: in development. See [`docs/roadmap.md`](docs/roadmap.md) for progress.
