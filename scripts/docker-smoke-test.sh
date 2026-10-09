@@ -101,6 +101,21 @@ expect_status "Source map" "$status" 404
 status="$(fetch /.env)"
 expect_status "Dotfile" "$status" 404
 
+# The demo image is built with the mock API (ADR 0008). Set EXPECT_MOCKS=false
+# to check an image built with --build-arg VITE_ENABLE_MOCKS=false instead.
+if [ "${EXPECT_MOCKS:-true}" = "true" ]; then
+  echo "Mock service worker (demo build)"
+  status="$(fetch /mockServiceWorker.js)"
+  expect_status "GET /mockServiceWorker.js" "$status" 200
+  expect_header_contains "Mock worker" content-type javascript
+  expect_header "Mock worker" cache-control no-cache
+  expect_security_headers "Mock worker"
+else
+  echo "No mock service worker (real build)"
+  status="$(fetch /mockServiceWorker.js)"
+  expect_status "GET /mockServiceWorker.js" "$status" 404
+fi
+
 echo "Health"
 status="$(fetch /healthz)"
 expect_status "GET /healthz" "$status" 200
