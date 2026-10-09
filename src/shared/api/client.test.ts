@@ -123,6 +123,19 @@ describe('getJson', () => {
     expect(log).not.toHaveBeenCalled()
   })
 
+  it('does not send a request whose signal was cancelled before the call', async () => {
+    let requested = false
+    respondWith(() => {
+      requested = true
+      return HttpResponse.json(profile())
+    })
+
+    const request = getJson('/profile', profileSchema, { signal: AbortSignal.abort() })
+
+    await expect(request).rejects.toMatchObject({ name: 'AbortError' })
+    expect(requested).toBe(false)
+  })
+
   it('logs failures with the endpoint, never the customer ID (NFR PR1, O2)', async () => {
     const log = vi.spyOn(logger, 'error')
     respondWith(() => new HttpResponse(null, { status: 503 }))
@@ -154,6 +167,7 @@ describe('retries (NFR R4)', () => {
     ['a 400', error('http', 400)],
     ['a 404', error('http', 404)],
     ['invalid data', error('validation')],
+    ['an HTTP error without a status', error('http')],
     ['an unexpected error', new Error('bug')],
   ])('never retries %s, which a second attempt cannot fix', (_name, failure) => {
     expect(shouldRetry(0, failure)).toBe(false)
