@@ -37,7 +37,8 @@ describe('periodRange (A10)', () => {
     ['7d', '2024-09-10'],
     ['30d', '2024-08-18'],
     ['90d', '2024-06-19'],
-    ['1y', '2023-09-17'],
+    // 365 days, not a calendar year: this window includes 29 February 2024.
+    ['1y', '2023-09-18'],
   ] as const)('%s covers exactly that many days, ending today: from %s', (period, startDate) => {
     expect(periodRange(period, '2024-09-16')).toEqual({ startDate, endDate: '2024-09-16' })
   })
