@@ -89,6 +89,14 @@ jobs:
           cache: npm
       - run: npm ci --ignore-scripts
       - run: npm run build
+      # A build without VITE_ENABLE_MOCKS must not contain the mock API
+      # (ADR 0008, threat T13).
+      - name: Check the build contains no mock code
+        run: |
+          if grep -rlE 'mockServiceWorker|\[MSW\]' dist/; then
+            echo '::error::Mock code found in a build made without VITE_ENABLE_MOCKS'
+            exit 1
+          fi
 
   docker:
     name: Docker image
