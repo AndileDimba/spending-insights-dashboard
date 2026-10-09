@@ -3,7 +3,7 @@ import type { z, ZodType } from 'zod'
 import { logger } from '@/shared/lib/logger'
 
 import { API_BASE_PATH, CUSTOMER_ID, REQUEST_TIMEOUT_MS } from './config'
-import { toSearchParams } from './params'
+import { type QueryParams, toSearchParams } from './params'
 
 // The one HTTP client. Components never call fetch; every response is
 // validated before it reaches the query cache (ADR 0009).
@@ -45,8 +45,8 @@ export class ApiError extends Error {
   }
 }
 
-export interface GetJsonOptions {
-  params?: Readonly<Record<string, string | number | undefined>>
+export interface GetJsonOptions<P> {
+  params?: P
   signal?: AbortSignal
   timeoutMs?: number
 }
@@ -67,13 +67,13 @@ function invalid(endpoint: string, fields: string): ApiError {
  * response parsed by `schema`. Throws an ApiError on failure, or the
  * caller's AbortError when the caller cancels.
  */
-export async function getJson<S extends ZodType>(
+export async function getJson<S extends ZodType, P extends QueryParams<P> = Record<string, string>>(
   path: string,
   schema: S,
-  { params = {}, signal, timeoutMs = REQUEST_TIMEOUT_MS }: GetJsonOptions = {},
+  { params, signal, timeoutMs = REQUEST_TIMEOUT_MS }: GetJsonOptions<P> = {},
 ): Promise<z.output<S>> {
   const url = new URL(`${API_BASE_PATH}/customers/${CUSTOMER_ID}${path}`, window.location.origin)
-  url.search = toSearchParams(params).toString()
+  if (params !== undefined) url.search = toSearchParams(params).toString()
 
   // AbortSignal.any is newer than our browser target (NFR B1), so the
   // caller's signal and the timeout are combined by hand.

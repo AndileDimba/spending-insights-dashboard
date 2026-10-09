@@ -90,11 +90,17 @@ export function transactionsParams(input: Untrusted<TransactionsParams>): Transa
 }
 
 /** Encodes parameters as a query string, leaving out any that are not set. */
-export function toSearchParams(
-  params: Readonly<Record<string, string | number | undefined>>,
-): URLSearchParams {
+/**
+ * Any parameters object, such as SummaryParams, whose values are strings,
+ * numbers or unset. A mapped type, unlike an index signature, also accepts
+ * interfaces.
+ */
+export type QueryParams<T> = { readonly [K in keyof T]: string | number | undefined }
+
+/** Encodes parameters as a query string, leaving out any that are not set. */
+export function toSearchParams<T extends QueryParams<T>>(params: T): URLSearchParams {
   const query = new URLSearchParams()
-  for (const [key, value] of Object.entries(params)) {
+  for (const [key, value] of Object.entries<string | number | undefined>(params)) {
     if (value !== undefined) query.append(key, String(value))
   }
   return query
