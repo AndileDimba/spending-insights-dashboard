@@ -67,12 +67,18 @@ export interface TransactionPage {
 
 const PERIOD_DAYS: Record<Period, number> = { '7d': 7, '30d': 30, '90d': 90, '1y': 365 }
 
-/** Budgets as a multiple of recent monthly spending, so the demo shows every status. */
-const GOAL_PLANS: readonly { category: CategoryName; factor: number }[] = [
-  { category: 'Groceries', factor: 1.05 },
-  { category: 'Dining', factor: 1.5 },
-  { category: 'Entertainment', factor: 0.85 },
-  { category: 'Transportation', factor: 1.2 },
+/**
+ * The share of its budget each goal should show. Budgets are derived from
+ * this month's spending so far, so the demo shows every status on whatever
+ * day it is opened, as the spec's own example does.
+ */
+// Over budget goes to Groceries, which has spending almost every day, so it
+// exceeds its budget even early in the month (the minimum budget is R100).
+const GOAL_PLANS: readonly { category: CategoryName; targetUsed: number }[] = [
+  { category: 'Groceries', targetUsed: 1.12 },
+  { category: 'Transportation', targetUsed: 0.92 },
+  { category: 'Dining', targetUsed: 0.55 },
+  { category: 'Entertainment', targetUsed: 0.4 },
 ]
 
 const ONE_HUNDRED_RAND = 10000
@@ -196,23 +202,20 @@ export function monthlyTrends(dataset: MockDataset, months: number): MonthTotal[
 
 export function spendingGoals(dataset: MockDataset): Goal[] {
   const month = dataset.today.slice(0, 7)
-  const recentMonths = [1, 2, 3].map((back) => addMonths(month, -back))
   const thisMonth = inMonth(dataset.transactions, month)
 
-  return GOAL_PLANS.map(({ category, factor }, index) => {
-    const ofCategory = (items: readonly MockTransaction[]) =>
-      items.filter((transaction) => transaction.category === category)
-    const typical =
-      recentMonths.reduce(
-        (total, recent) => total + netTotal(ofCategory(inMonth(dataset.transactions, recent))),
-        0,
-      ) / recentMonths.length
+  return GOAL_PLANS.map(({ category, targetUsed }, index) => {
+    const currentSpent = netTotal(
+      thisMonth.filter((transaction) => transaction.category === category),
+    )
     // Whole hundreds of rand, as a person would set a budget, and never zero.
+    // Rounding up keeps a goal under 100% below it, and rounding down keeps an
+    // over-budget goal over it.
+    const round = targetUsed < 1 ? Math.ceil : Math.floor
     const monthlyBudget = Math.max(
       ONE_HUNDRED_RAND,
-      Math.ceil((typical * factor) / ONE_HUNDRED_RAND) * ONE_HUNDRED_RAND,
+      round(currentSpent / targetUsed / ONE_HUNDRED_RAND) * ONE_HUNDRED_RAND,
     ) as Cents
-    const currentSpent = netTotal(ofCategory(thisMonth))
     const percentageUsed = roundTo((currentSpent / monthlyBudget) * 100, 2)
 
     return {
