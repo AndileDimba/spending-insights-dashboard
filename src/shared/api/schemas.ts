@@ -8,7 +8,7 @@ import { type Cents, roundToCents, toCents } from '@/shared/lib/money'
 
 // ---- Building blocks --------------------------------------------------------
 
-const period = z.enum(['7d', '30d', '90d', '1y'])
+export const periodSchema = z.enum(['7d', '30d', '90d', '1y'])
 const isoDate = z.iso.date()
 const text = z.string().min(1)
 const count = z.int().nonnegative()
@@ -70,7 +70,7 @@ export const profileSchema = z.object({
 })
 
 export const summarySchema = z.object({
-  period,
+  period: periodSchema,
   totalSpent: amount,
   transactionCount: count,
   averageTransaction: average,
@@ -158,13 +158,13 @@ export const goalsSchema = z.object({
 
 export const filtersSchema = z.object({
   categories: z.array(z.object({ name: text, color: colour, icon: text })),
-  dateRangePresets: z.array(z.object({ label: text, value: period })),
+  dateRangePresets: z.array(z.object({ label: text, value: periodSchema })),
 })
 
 // ---- Types ------------------------------------------------------------------
 // Inferred from the schemas, never written by hand (ADR 0009).
 
-export type Period = z.output<typeof period>
+export type Period = z.output<typeof periodSchema>
 export type Profile = z.output<typeof profileSchema>
 export type SpendingSummary = z.output<typeof summarySchema>
 export type CategoryBreakdown = z.output<typeof categoriesSchema>
