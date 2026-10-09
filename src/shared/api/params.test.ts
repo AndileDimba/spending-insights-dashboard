@@ -113,6 +113,8 @@ describe('transactions', () => {
       startDate: '2024-08-16',
     })
     expect(transactionsParams({ startDate: '2024-08-16' })).not.toHaveProperty('endDate')
+    expect(transactionsParams({ endDate: '2024-09-16' })).toMatchObject({ endDate: '2024-09-16' })
+    expect(transactionsParams({ endDate: '2024-09-16' })).not.toHaveProperty('startDate')
   })
 
   it('drops dates that are invalid or form a range that ends before it starts', () => {
