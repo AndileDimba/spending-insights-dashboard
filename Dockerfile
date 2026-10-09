@@ -14,6 +14,9 @@ COPY package.json package-lock.json .npmrc ./
 RUN --mount=type=cache,target=/root/.npm npm ci --ignore-scripts
 
 COPY . .
+# The demo image contains the mock API, so it runs with no backend (ADR 0008).
+# Build a real deployment with --build-arg VITE_ENABLE_MOCKS=false.
+ARG VITE_ENABLE_MOCKS=true
 RUN npm run build
 
 # ---- Runtime: static files served by unprivileged nginx (ADR 0012) --------
