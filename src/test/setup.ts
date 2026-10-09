@@ -12,7 +12,7 @@ import { server } from '@/mocks/node'
 const unhandledRequests: string[] = []
 
 beforeAll(() => {
-  server.listen({ onUnhandledRequest: 'error' })
+  server.listen({ onUnhandledFrame: 'error' })
   // 'error' alone only rejects the fetch, which code under test might catch.
   // Recording the request lets afterEach fail the test regardless.
   server.events.on('request:unhandled', ({ request }) => {
