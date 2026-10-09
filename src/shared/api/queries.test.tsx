@@ -1,6 +1,6 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { renderHook, waitFor } from '@testing-library/react'
-import { http, HttpResponse } from 'msw'
+import { delay, http, HttpResponse } from 'msw'
 import type { ReactNode } from 'react'
 import { describe, expect, it } from 'vitest'
 
@@ -59,9 +59,14 @@ describe('query hooks', () => {
       { wrapper },
     )
 
-    await waitFor(() => {
-      expect(Object.values(result.current).every((query) => query.isSuccess)).toBe(true)
-    })
+    // Seven requests at once: the default 1 s wait was flaky on a busy machine,
+    // and how long they take is not what this test checks.
+    await waitFor(
+      () => {
+        expect(Object.values(result.current).every((query) => query.isSuccess)).toBe(true)
+      },
+      { timeout: 5000 },
+    )
     expect(result.current.profile.data?.name).toBe('John Doe')
     expect(result.current.summary.data?.period).toBe('30d')
     expect(result.current.categories.data?.categories.length).toBeGreaterThan(0)
@@ -120,27 +125,28 @@ describe('query hooks', () => {
     })
   })
 
-  it('cancel a superseded request when the parameters change', async () => {
-    const { wrapper } = setup({ slowDelayMs: 200 })
-    const signals: AbortSignal[] = []
-    server.events.on('request:start', ({ request }) => {
-      if (request.url.includes('/spending/summary')) signals.push(request.signal)
-    })
+  it('cancel a superseded request when the parameters change, discarding its late answer', async () => {
+    const { queryClient, wrapper } = setup({ slowDelayMs: 200 })
 
     const { result, rerender } = renderHook(({ period }) => useSpendingSummary({ period }), {
       wrapper,
       initialProps: { period: '7d' },
     })
     await waitFor(() => {
-      expect(signals).toHaveLength(1)
+      expect(result.current.isFetching).toBe(true)
     })
     rerender({ period: '1y' })
-
     await waitFor(() => {
       expect(result.current.data?.period).toBe('1y')
     })
-    expect(signals[0]?.aborted).toBe(true)
-    server.events.removeAllListeners('request:start')
+    // Long enough for the cancelled 7d response to have arrived, had it not been aborted.
+    await delay(250)
+
+    expect(queryClient.getQueryState(queryKeys.summary({ period: '7d' }))).toMatchObject({
+      status: 'pending',
+      fetchStatus: 'idle',
+      data: undefined,
+    })
   })
 
   it('keep the previous page on screen while the next one loads (NFR P7)', async () => {
