@@ -198,6 +198,17 @@ describe('spendingGoals (A8)', () => {
     }
   })
 
+  it.each(['2024-09-12T12:00:00Z', '2024-09-16T12:00:00Z', '2024-09-28T12:00:00Z'])(
+    'shows every status in the demo, whatever the day of the month (%s)',
+    (now) => {
+      const statuses = spendingGoals(generateDataset({ seed: 1, now: new Date(now) })).map(
+        (goal) => goal.status,
+      )
+
+      expect(new Set(statuses)).toEqual(new Set(['on_track', 'warning', 'exceeded']))
+    },
+  )
+
   it('has unique ids and budgets in whole rand', () => {
     expect(new Set(goals.map((goal) => goal.id)).size).toBe(goals.length)
     expect(goals.every((goal) => goal.monthlyBudget % 100 === 0)).toBe(true)
