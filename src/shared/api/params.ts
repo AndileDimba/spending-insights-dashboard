@@ -6,7 +6,7 @@ import { type Period, periodSchema } from './schemas'
 // so that only values the contract allows are ever sent. Invalid values fall
 // back to the contract's defaults instead of failing (A2, A9, threat T4).
 
-const SORT_ORDERS = ['date_desc', 'date_asc', 'amount_desc', 'amount_asc'] as const
+export const SORT_ORDERS = ['date_desc', 'date_asc', 'amount_desc', 'amount_asc'] as const
 export type SortBy = (typeof SORT_ORDERS)[number]
 
 /** Values as they arrive from the URL or a form: anything, until parsed. */
