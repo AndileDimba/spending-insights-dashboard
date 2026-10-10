@@ -33,6 +33,7 @@ const PAIRS: [string, string, number][] = [
   ['--color-link', '--color-bg', 4.5],
   ['--color-link', '--color-surface', 4.5],
   ['--color-on-primary', '--color-primary', 4.5],
+  ['--color-on-header', '--color-header', 4.5],
   ['--color-danger', '--color-surface', 4.5],
   ['--color-warning', '--color-surface', 4.5],
   ['--color-success', '--color-surface', 4.5],
