@@ -1,4 +1,5 @@
 import { CategoryBreakdown } from '@/features/categories'
+import { SpendingGoals } from '@/features/goals'
 import { PeriodSelector } from '@/features/period'
 import { ProfileHeader } from '@/features/profile'
 import { SpendingSummary } from '@/features/summary'
@@ -13,6 +14,8 @@ export function OverviewPage() {
       <PeriodSelector />
       <SpendingSummary />
       <CategoryBreakdown />
+      {/* Budgets before trends: they may need action this month (wireframes). */}
+      <SpendingGoals />
       <MonthlyTrends />
     </Page>
   )
