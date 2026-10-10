@@ -1,6 +1,6 @@
 import { screen, within } from '@testing-library/react'
 import { delay, http, HttpResponse } from 'msw'
-import { beforeEach, describe, expect, it } from 'vitest'
+import { beforeAll, beforeEach, describe, expect, it } from 'vitest'
 
 import { server } from '@/mocks/node'
 import { profileSchema, trendsSchema } from '@/shared/api/schemas'
@@ -19,6 +19,12 @@ const TRENDS_URL = '*/api/customers/12345/spending/trends'
 const trends = () => specExample(trendsSchema, 4)
 
 let requests: URLSearchParams[] = []
+
+// The chart is loaded lazily. Its first import in jsdom takes many seconds, so
+// it is loaded once here rather than inside whichever test happens to run first.
+beforeAll(async () => {
+  await import('./TrendsChart')
+}, 60_000)
 
 function respondWith(body: object) {
   server.use(
@@ -86,11 +92,12 @@ describe('MonthlyTrends', () => {
 
     renderWithProviders(<MonthlyTrends />)
 
-    expect(
-      await screen.findByRole('img', {
-        name: 'Chart of monthly spending from January 2024 to June 2024. The highest month is June 2024 at R 4 250,75. Show as table lists every month.',
-      }),
-    ).toBeInTheDocument()
+    const chart = await screen.findByRole('img')
+
+    // en-ZA amounts use non-breaking spaces, so compare with spaces normalised.
+    expect(chart.getAttribute('aria-label')?.replace(/\s/g, ' ')).toBe(
+      'Chart of monthly spending from January 2024 to June 2024. The highest month is June 2024 at R 4 250,75. Show as table lists every month.',
+    )
   })
 
   it('lists each month with total spent, transactions and average in a table', async () => {
