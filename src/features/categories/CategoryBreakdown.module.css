@@ -1,0 +1,118 @@
+.breakdown {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.heading {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--space-1) var(--space-3);
+}
+
+.title {
+  font-size: var(--font-size-lg);
+}
+
+.range {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+}
+
+/* Chart above the list on a phone, beside it on a wider screen. */
+.content {
+  display: grid;
+  gap: var(--space-4);
+  justify-items: center;
+  padding: var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-card);
+}
+
+@media (min-width: 48rem) {
+  .content {
+    grid-template-columns: auto 1fr;
+    align-items: center;
+    gap: var(--space-8);
+  }
+}
+
+.chart {
+  width: 12.5rem;
+  height: 12.5rem;
+}
+
+/* A gap between segments in the card colour, so neighbouring colours never
+   have to be told apart by hue alone (A15, WCAG 1.4.11). */
+.chart :global(.recharts-pie-sector) path {
+  stroke: var(--color-surface);
+  stroke-width: 2px;
+}
+
+.list {
+  display: grid;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.item {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: var(--space-3);
+  min-height: var(--target-size);
+  padding: var(--space-2) 0;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.item:last-child {
+  border-bottom: 0;
+}
+
+.swatch {
+  width: 0.875rem;
+  height: 0.875rem;
+  border-radius: 50%;
+}
+
+.name {
+  display: grid;
+  min-width: 0;
+}
+
+.name a {
+  font-weight: var(--font-weight-semibold);
+}
+
+.count {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+}
+
+.figures {
+  display: grid;
+  justify-items: end;
+}
+
+.amount {
+  font-weight: var(--font-weight-semibold);
+  font-variant-numeric: tabular-nums;
+}
+
+.percentage {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+  font-variant-numeric: tabular-nums;
+}
+
+.empty {
+  padding: var(--space-6) var(--space-4);
+  border: 1px dashed var(--color-border-strong);
+  border-radius: var(--radius-lg);
+  color: var(--color-text-muted);
+  text-align: center;
+}
