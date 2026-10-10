@@ -3,12 +3,32 @@
   gap: var(--space-3);
 }
 
+.emptyAction {
+  min-height: var(--target-size);
+  padding: 0 var(--space-4);
+  border: 0;
+  border-radius: var(--radius-md);
+  background: var(--color-primary);
+  color: var(--color-on-primary);
+  font: inherit;
+  font-weight: var(--font-weight-semibold);
+  cursor: pointer;
+}
+
 .loading {
   display: grid;
   gap: var(--space-2);
 }
 
+.count {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+}
+
 .empty {
+  display: grid;
+  justify-items: center;
+  gap: var(--space-3);
   padding: var(--space-6) var(--space-4);
   border: 1px dashed var(--color-border-strong);
   border-radius: var(--radius-lg);

@@ -3,7 +3,7 @@ import { delay, http, HttpResponse } from 'msw'
 import { beforeEach, describe, expect, it } from 'vitest'
 
 import { server } from '@/mocks/node'
-import { profileSchema, transactionsSchema } from '@/shared/api/schemas'
+import { filtersSchema, profileSchema, transactionsSchema } from '@/shared/api/schemas'
 import { first, specExample } from '@/test/api-spec'
 import { expectNoAccessibilityViolations } from '@/test/axe'
 import { stubMediaQueries } from '@/test/media'
@@ -26,6 +26,10 @@ beforeEach(() => {
   server.use(
     http.get('*/api/customers/12345/profile', () =>
       HttpResponse.json(specExample(profileSchema, 1)),
+    ),
+    // The filters' category list comes from here.
+    http.get('*/api/customers/12345/filters', () =>
+      HttpResponse.json(specExample(filtersSchema, 7)),
     ),
   )
 })
