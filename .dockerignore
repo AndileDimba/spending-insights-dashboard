@@ -1,0 +1,13 @@
+# Allowlist: only what the build needs reaches the build context, so local
+# files such as .env, coverage reports or node_modules can never leak into
+# an image layer.
+*
+!package.json
+!package-lock.json
+!.npmrc
+!index.html
+!public/
+!src/
+!tsconfig*.json
+!vite.config.ts
+!nginx/

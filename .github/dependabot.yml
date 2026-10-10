@@ -1,0 +1,81 @@
+version: 2
+
+# Weekly, grouped updates keep the review load to a few PRs a week. Titles
+# use 'build(deps)' and 'build(deps-dev)' so they pass the PR conventions
+# check and read well in the squash commit history.
+#
+# The cooldown waits a few days before proposing a new release. Hijacked
+# releases (such as trivy-action, March 2026) are usually found and pulled
+# within days, so a short delay avoids installing one. Security updates are
+# not delayed: Dependabot raises those as soon as an advisory is published.
+
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+      time: '07:00'
+      timezone: Africa/Johannesburg
+    cooldown:
+      default-days: 3
+      semver-major-days: 14
+    open-pull-requests-limit: 5
+    commit-message:
+      prefix: build
+      prefix-development: build
+      include: scope
+    labels: [build]
+    groups:
+      production:
+        dependency-type: production
+        update-types: [minor, patch]
+      development:
+        dependency-type: development
+        update-types: [minor, patch]
+    ignore:
+      # Held back on purpose until the tooling supports it; see PR #34.
+      # Upgraded by hand.
+      - dependency-name: typescript
+        update-types: [version-update:semver-major]
+      # Node types follow the runtime pinned in .nvmrc, not the newest Node.
+      - dependency-name: '@types/node'
+        update-types: [version-update:semver-major]
+
+  # Updates the commit SHAs that actions are pinned to.
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+      time: '07:00'
+      timezone: Africa/Johannesburg
+    cooldown:
+      default-days: 7
+    commit-message:
+      prefix: ci
+      include: scope
+    labels: [ci]
+    groups:
+      actions:
+        patterns: ['*']
+
+  # Updates the base image digests in the Dockerfile.
+  - package-ecosystem: docker
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+      time: '07:00'
+      timezone: Africa/Johannesburg
+    cooldown:
+      default-days: 3
+    commit-message:
+      prefix: build
+      include: scope
+    labels: [build]
+    ignore:
+      # The Node major is declared in .nvmrc, package.json engines and here,
+      # and moves to a new LTS line by hand in all three at once (#42).
+      - dependency-name: node
+        update-types: [version-update:semver-major]

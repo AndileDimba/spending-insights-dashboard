@@ -21,27 +21,27 @@ Source material lives in `docs/brief/`:
 
 ## Tech stack (decided, see `docs/adr/`)
 
-| Concern | Choice |
-| --- | --- |
-| Language | TypeScript, `strict: true`, no `any` |
-| UI | React 18+ with function components and hooks |
-| Build | Vite |
-| Routing | React Router |
-| Server state | TanStack Query (no server data in global client state) |
-| URL state | Filters, period, pagination and sorting live in the URL query string |
-| API mocking | MSW (Mock Service Worker) at the network layer, in dev, tests and the Docker image |
-| Runtime validation | Zod schemas at the API boundary; types are inferred from schemas |
-| Charts | Recharts, each chart with an accessible table or text alternative |
-| Styling | CSS Modules with design tokens as CSS custom properties |
-| Unit / component tests | Vitest + React Testing Library + `@testing-library/user-event` |
-| Accessibility tests | `vitest-axe` / `@axe-core/playwright` |
-| End-to-end tests | Playwright |
-| Mutation tests | Stryker (on `src/shared/lib` and `src/shared/api`) |
-| Lint / format | ESLint (typescript-eslint, react-hooks, jsx-a11y) + Prettier |
-| Git hooks | `.githooks/` (branch protection) plus lint-staged on commit |
-| Container | Multi-stage Dockerfile: Node build stage, nginx (unprivileged) runtime |
-| CI | GitHub Actions: lint, typecheck, unit tests, e2e, Docker build |
-| Package manager | npm (lockfile committed, use `npm ci` in CI and Docker) |
+| Concern | Choice | Decision |
+| --- | --- | --- |
+| Language | TypeScript, `strict: true`, no `any` | [ADR 0005](docs/adr/0005-react-vite-typescript-spa.md) |
+| UI | React 19 with function components and hooks | [ADR 0005](docs/adr/0005-react-vite-typescript-spa.md) |
+| Build | Vite | [ADR 0005](docs/adr/0005-react-vite-typescript-spa.md) |
+| Routing | React Router | [ADR 0007](docs/adr/0007-server-state-and-url-state.md) |
+| Server state | TanStack Query (no server data in global client state) | [ADR 0007](docs/adr/0007-server-state-and-url-state.md) |
+| URL state | Filters, period, pagination and sorting live in the URL query string | [ADR 0007](docs/adr/0007-server-state-and-url-state.md) |
+| API mocking | MSW (Mock Service Worker) at the network layer, in dev, tests and the Docker image | [ADR 0008](docs/adr/0008-msw-network-layer-mocking.md) |
+| Runtime validation | Zod schemas at the API boundary; types are inferred from schemas | [ADR 0009](docs/adr/0009-zod-validation-at-the-api-boundary.md) |
+| Charts | Recharts, each chart with an accessible table or text alternative | [ADR 0011](docs/adr/0011-recharts-with-accessible-alternatives.md) |
+| Styling | CSS Modules with design tokens as CSS custom properties | [ADR 0010](docs/adr/0010-css-modules-and-design-tokens.md) |
+| Unit / component tests | Vitest + React Testing Library + `@testing-library/user-event` | [ADR 0003](docs/adr/0003-test-driven-development.md) |
+| Accessibility tests | `axe-core` via `src/test/axe.ts` / `@axe-core/playwright` | [ADR 0003](docs/adr/0003-test-driven-development.md) |
+| End-to-end tests | Playwright | [ADR 0003](docs/adr/0003-test-driven-development.md) |
+| Mutation tests | Stryker (on `src/shared/lib` and `src/shared/api`) | [ADR 0003](docs/adr/0003-test-driven-development.md) |
+| Lint / format | ESLint (typescript-eslint, react-hooks, jsx-a11y) + Prettier | Tooling, no ADR |
+| Git hooks | `.githooks/` (branch protection) plus lint-staged on commit | [ADR 0002](docs/adr/0002-git-flow-branching.md) |
+| Container | Multi-stage Dockerfile: Node build stage, nginx (unprivileged) runtime | [ADR 0012](docs/adr/0012-unprivileged-nginx-runtime.md) |
+| CI | GitHub Actions: lint, typecheck, unit tests, e2e, Docker build | Tooling, no ADR |
+| Package manager | npm (lockfile committed, use `npm ci` in CI and Docker) | Tooling, no ADR |
 
 Do not add a dependency without a clear reason. If a new library is a meaningful decision, add an ADR.
 
@@ -61,10 +61,10 @@ We work test-first. Read [ADR 0003](docs/adr/0003-test-driven-development.md) an
 
 ## Architecture rules
 
-- **Feature-based folders.** `src/features/<feature>/` holds that feature's components, hooks, API calls and tests. Shared building blocks go in `src/shared/` (ui, lib, hooks). App wiring (providers, router, layout) goes in `src/app/`.
-- **One API client.** All HTTP goes through `src/shared/api/`. Components never call `fetch` directly. Each endpoint has a Zod schema, a typed fetcher and a TanStack Query hook with a query key factory.
+- **Feature-based folders** ([ADR 0006](docs/adr/0006-feature-folders.md)). `src/features/<feature>/` holds that feature's components, hooks, utilities and tests, and exposes only its `index.ts`. Shared building blocks go in `src/shared/` (api, ui, lib, hooks). App wiring (providers, router, layout, page composition) goes in `src/app/`. Imports flow one way: app to features to shared. A feature never imports another feature's internals.
+- **One API client.** All HTTP and all API code (schemas, fetchers, query hooks) live in `src/shared/api/`, because endpoints are shared between features. Components never call `fetch` directly. Each endpoint has a Zod schema, a typed fetcher and a TanStack Query hook with a query key factory.
 - **Mocks mirror the contract.** MSW handlers live in `src/mocks/` and must honour every documented query parameter (period, date range, category, sort, limit, offset). Generate realistic, deterministic data (seeded) so tests are stable.
-- **Money is never a float in display logic.** Format with `Intl.NumberFormat('en-ZA', { style: 'currency', currency })`. Format dates with `Intl.DateTimeFormat('en-ZA')`. Keep formatting in `src/shared/lib/format.ts`.
+- **Money is integer cents** ([ADR 0013](docs/adr/0013-money-as-integer-cents.md)). Schemas convert API amounts to a branded `Cents` type; all arithmetic happens in cents; conversion back to rand happens only in the formatter. Format with `Intl.NumberFormat('en-ZA', { style: 'currency', currency })`. Format dates with `Intl.DateTimeFormat('en-ZA')`. Keep formatting in `src/shared/lib/format.ts`.
 - **Every data view handles four states:** loading (skeleton), empty, error (with retry) and success. No blank screens, no unhandled promise rejections.
 - **Components** are small, typed, and presentational where possible. Data fetching lives in hooks, not in leaf components. Prefer composition over prop drilling more than two levels.
 - **Mobile first.** Design for 360px wide upwards. No horizontal page scroll at any breakpoint.
@@ -73,14 +73,9 @@ We work test-first. Read [ADR 0003](docs/adr/0003-test-driven-development.md) an
 
 ## API assumptions
 
-The spec has gaps. When you hit one, do not guess silently. Make a decision, implement it, and record it in `docs/api-assumptions.md` with: the gap, the decision, and the reasoning. Known gaps so far:
+The spec has gaps. Every known gap is decided in [`docs/api-assumptions.md`](docs/api-assumptions.md) (A1 to A19), with the reasoning and the question for the backend. Read it before writing schemas, mocks or any view that shows API data, and cite decisions by ID in code comments and test names where it helps (for example `// A7: refunds are negative amounts`).
 
-- Categories in the example are not sorted by amount (Utilities R458.70 listed after Shopping R450.80). The UI sorts; it does not trust response order.
-- `period` and `startDate`/`endDate` can both be sent to `/spending/categories`. Precedence is unspecified.
-- `currency` only exists on the profile, not on amounts.
-- Trends default to 12 months but the example returns 6, and trend months do not overlap the category date range.
-- No error response shape, no auth, no refunds or negative amounts are documented.
-- `customerId` source is unspecified (assume a single mocked signed-in customer).
+When you hit a new gap, do not guess silently. Make a decision, implement it, and add it to that document with the next ID: the gap, the decision, the reasoning and the question for the backend.
 
 ## Git workflow (mandatory)
 
@@ -135,11 +130,14 @@ These are added as the project is scaffolded. Keep this table up to date.
 | Dev server (with MSW) | `npm run dev` |
 | Lint | `npm run lint` |
 | Format | `npm run format` |
+| Check formatting | `npm run format:check` |
 | Typecheck | `npm run typecheck` |
 | Unit tests | `npm test` |
+| Tests in watch mode | `npm run test:watch` |
 | Coverage | `npm run test:coverage` |
 | E2E tests | `npm run test:e2e` |
 | Production build | `npm run build` |
+| Preview production build | `npm run preview` |
 | Docker build | `docker build -t spending-insights .` |
 | Docker run | `docker run --rm -p 8080:8080 spending-insights` |
 

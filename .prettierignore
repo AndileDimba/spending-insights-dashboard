@@ -1,0 +1,10 @@
+dist
+coverage
+playwright-report
+test-results
+reports
+package-lock.json
+
+# Markdown is written by hand. Prettier pads every table column to the
+# widest cell, which turns one-word edits into whole-table diffs.
+*.md
