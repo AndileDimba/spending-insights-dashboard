@@ -1,6 +1,12 @@
 import { describe, expect, it } from 'vitest'
 
-import { formatCalendarDate, formatDateTime, formatMoney } from './format'
+import {
+  formatCalendarDate,
+  formatCount,
+  formatDateTime,
+  formatMoney,
+  formatPercent,
+} from './format'
 import type { Cents } from './money'
 
 // en-ZA separates thousands with a non-breaking space, so a long amount never
@@ -45,5 +51,23 @@ describe('formatDateTime (NFR L2)', () => {
 
   it('moves a late-evening UTC moment onto the next South African day', () => {
     expect(formatDateTime('2024-09-15T22:30:00Z')).toBe('16 Sept 2024, 00:30')
+  })
+})
+
+describe('formatPercent', () => {
+  it.each([
+    [12.5, '12,5%'],
+    [3.2, '3,2%'],
+    [100, '100%'],
+    [96.72, '96,7%'],
+  ])('formats %d points as %s, with the en-ZA decimal comma', (points, expected) => {
+    expect(formatPercent(points)).toBe(expected)
+  })
+})
+
+describe('formatCount', () => {
+  it('groups thousands with a non-breaking space', () => {
+    expect(visible(formatCount(1250))).toBe('1·250')
+    expect(formatCount(47)).toBe('47')
   })
 })

@@ -1,19 +1,11 @@
 import { type SubmitEvent, useId, useState } from 'react'
 
 import { useFilters } from '@/shared/api/queries'
-import type { Period } from '@/shared/api/schemas'
 import { todayInSouthAfrica } from '@/shared/lib/dates'
 
 import styles from './PeriodSelector.module.css'
+import { DOCUMENTED_PRESETS } from './presets'
 import { usePeriodSelection } from './usePeriodSelection'
-
-/** The presets in the contract, used until /filters answers, or if it fails. */
-const DOCUMENTED_PRESETS: readonly { label: string; value: Period }[] = [
-  { label: 'Last 7 days', value: '7d' },
-  { label: 'Last 30 days', value: '30d' },
-  { label: 'Last 90 days', value: '90d' },
-  { label: 'Last year', value: '1y' },
-]
 
 /**
  * Chooses the period the dashboard shows. Native radio buttons give arrow-key

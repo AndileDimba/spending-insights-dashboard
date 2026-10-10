@@ -49,3 +49,16 @@ export function formatCalendarDate(date: string): string {
 export function formatDateTime(isoInstant: string): string {
   return dateTime.format(new Date(isoInstant))
 }
+
+const percent = new Intl.NumberFormat(LOCALE, { style: 'percent', maximumFractionDigits: 1 })
+const count = new Intl.NumberFormat(LOCALE)
+
+/** Formats a percentage given in points, e.g. 12.5 becomes 12,5%. */
+export function formatPercent(points: number): string {
+  return percent.format(points / 100)
+}
+
+/** Formats a count, e.g. 1250 becomes 1 250. */
+export function formatCount(value: number): string {
+  return count.format(value)
+}
