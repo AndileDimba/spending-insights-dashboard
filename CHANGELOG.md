@@ -6,6 +6,35 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-10-10
+
+Milestone 2 (Dashboard) and milestone 3 (Transactions): the app now shows a customer's spending end to end, and a public demo is set up on Vercel.
+
+### Added
+
+#### Dashboard
+
+- App shell: a skip link, header with the main navigation, page titles, focus moved to the heading after navigation, a not found page, and an error boundary that keeps the navigation working when a page fails.
+- Capitec-inspired design tokens with a dark theme that follows the system, every colour pair checked for WCAG AA contrast by a test (ADR 0014).
+- Profile header: name, account type, member since and lifetime spending, with the email never shown.
+- Period selector: last 7, 30 or 90 days, last year, or a custom range, kept in the URL.
+- Spending summary: total, transactions, average and top category, each change from the previous period stated in words.
+- Spending by category: a donut chart and the same data as a list, sorted by amount, each category linking to its transactions.
+- Budgets: progress for each goal, with its status in words and an icon as well as colour.
+- Monthly trends: a bar chart over 6, 12 or 24 months with a table alternative, noting the month so far.
+
+#### Transactions
+
+- A table on wide screens and a list on phones, never both, with refunds shown as money returned.
+- Filters for category and dates and a sort order, all in the URL, with the result count announced to screen readers.
+- Paging with a choice of 20, 50 or 100 a page, and a way back from a page past the end.
+
+#### Delivery
+
+- Formatting for money, percentages, counts, dates and months in en-ZA, with dates in South African time.
+- A demo deployment on Vercel with the same security headers and Content Security Policy as the Docker image (ADR 0015).
+- API assumption A20: the summary endpoint takes no date range.
+
 ## [0.2.0] - 2026-10-10
 
 The first release, covering milestone 0 (Foundations) and milestone 1 (Data layer). They ship together, so there is no 0.1.0. There is no dashboard yet: the app shows a heading, and its data layer is ready for milestone 2.
@@ -33,5 +62,6 @@ The first release, covering milestone 0 (Foundations) and milestone 1 (Data laye
 - A mock API on MSW 3: about 18 months of seeded South African transactions, every endpoint derived from one data set so the numbers agree, strict parameter validation with Problem Details, and error, empty and slow scenarios.
 - The mock API runs in the development server and in the demo Docker image (`VITE_ENABLE_MOCKS`). A real build contains no mock code, and CI checks that.
 
-[Unreleased]: https://github.com/AndileDimba/spending-insights-dashboard/compare/v0.2.0...develop
+[Unreleased]: https://github.com/AndileDimba/spending-insights-dashboard/compare/v0.3.0...develop
+[0.3.0]: https://github.com/AndileDimba/spending-insights-dashboard/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/AndileDimba/spending-insights-dashboard/releases/tag/v0.2.0
