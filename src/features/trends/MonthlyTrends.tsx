@@ -109,6 +109,11 @@ function Details({ trends: { trends }, requested, currency }: DetailsProps) {
         <TrendsChart trends={trends} currency={currency} summary={summary} />
       </Suspense>
 
+      {/* The last bar is low because the month is still going, not because spending fell. */}
+      {last.month === currentMonth && (
+        <p className={styles.partial}>{formatMonth(last.month)} is the month so far.</p>
+      )}
+
       <details className={styles.details}>
         <summary>Show as table</summary>
         <div className={styles.tableScroll}>
