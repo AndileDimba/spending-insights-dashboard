@@ -63,7 +63,14 @@ export function formatCount(value: number): string {
   return count.format(value)
 }
 
+const shortDate = new Intl.DateTimeFormat(LOCALE, {
+  day: 'numeric',
+  month: 'short',
+  year: 'numeric',
+  timeZone: 'UTC',
+})
+
 /** Formats a calendar date (YYYY-MM-DD) briefly, e.g. 16 Aug 2024. */
-export function formatShortDate(_date: string): string {
-  return ''
+export function formatShortDate(date: string): string {
+  return shortDate.format(new Date(`${date}T00:00:00Z`))
 }
