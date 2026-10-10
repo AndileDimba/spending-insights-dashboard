@@ -1,0 +1,105 @@
+.trends {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.heading {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2) var(--space-4);
+}
+
+.title {
+  font-size: var(--font-size-lg);
+}
+
+.card {
+  display: grid;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-card);
+}
+
+.partial {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+}
+
+.chart {
+  width: 100%;
+  height: 13.75rem;
+}
+
+/* Chart colours come from the theme tokens, so they follow dark mode. */
+.chart :global(.recharts-bar-rectangle) path {
+  fill: var(--color-accent);
+}
+
+.chart :global(.recharts-cartesian-grid) line {
+  stroke: var(--color-border);
+}
+
+.chart :global(.recharts-cartesian-axis-tick-value) {
+  fill: var(--color-text-muted);
+  font-size: 0.75rem;
+}
+
+.details summary {
+  width: fit-content;
+  min-height: var(--target-size);
+  padding: var(--space-2) 0;
+  color: var(--color-link);
+  font-weight: var(--font-weight-semibold);
+  cursor: pointer;
+}
+
+/* A wide table scrolls inside its own box, never the page (NFR B3). */
+.tableScroll {
+  overflow-x: auto;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--font-size-sm);
+}
+
+.table th,
+.table td {
+  padding: var(--space-2);
+  border-bottom: 1px solid var(--color-border);
+  text-align: right;
+  white-space: nowrap;
+}
+
+.table th[scope='row'],
+.table th:first-child {
+  text-align: left;
+}
+
+.table td {
+  font-variant-numeric: tabular-nums;
+}
+
+/* The region already shows the heading; the caption names the table for assistive technology. */
+.caption {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.empty {
+  padding: var(--space-6) var(--space-4);
+  border: 1px dashed var(--color-border-strong);
+  border-radius: var(--radius-lg);
+  color: var(--color-text-muted);
+  text-align: center;
+}

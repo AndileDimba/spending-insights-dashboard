@@ -1,0 +1,1 @@
+export { MonthlyTrends } from './MonthlyTrends'

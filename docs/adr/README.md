@@ -17,6 +17,8 @@ Why the project looks the way it does. Each record states the context, the optio
 | [0011](0011-recharts-with-accessible-alternatives.md) | Recharts for charts, always paired with an accessible alternative | Accepted |
 | [0012](0012-unprivileged-nginx-runtime.md) | Serve the build from unprivileged nginx with security headers | Accepted |
 | [0013](0013-money-as-integer-cents.md) | Represent money as integer cents inside the app | Accepted |
+| [0014](0014-capitec-inspired-palette.md) | Capitec-inspired colours, with accessible variants | Accepted |
+| [0015](0015-demo-on-vercel.md) | Host the demo on Vercel at insights.dimba.co.za | Accepted |
 
 ## Adding a decision
 

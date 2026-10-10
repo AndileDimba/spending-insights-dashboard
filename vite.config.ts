@@ -28,6 +28,9 @@ export default defineConfig(({ command }) => {
     },
     test: {
       environment: 'jsdom',
+      // CSS is not processed in tests, so CSS imports come back empty. The
+      // token contrast test reads tokens.css, so that one file is processed.
+      css: { include: [/tokens\.css/] },
       include: ['src/**/*.test.{ts,tsx}'],
       setupFiles: ['./src/test/setup.ts'],
       // Local-time bugs then behave the same on a laptop in Johannesburg and on CI.

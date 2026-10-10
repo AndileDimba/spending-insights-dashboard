@@ -1,0 +1,66 @@
+.profile {
+  display: grid;
+  gap: var(--space-2);
+  padding: var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-card);
+}
+
+/* The error panel has its own frame, so the card steps back rather than nest a box in a box. */
+.profile[data-status='error'] {
+  padding: 0;
+  border: 0;
+  background: none;
+  box-shadow: none;
+}
+
+.identity {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  /* Lets the name shrink and truncate instead of pushing the badge off screen. */
+  min-width: 0;
+}
+
+.name {
+  min-width: 0;
+  overflow: hidden;
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.badge {
+  flex-shrink: 0;
+  padding: var(--space-1) var(--space-2);
+  border: 1px solid var(--color-primary);
+  border-radius: var(--radius-sm);
+  color: var(--color-link);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+}
+
+.since {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+}
+
+.total {
+  margin: var(--space-2) 0 0;
+}
+
+.total dt {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+}
+
+.amount {
+  margin: 0;
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  /* Digits line up across amounts. */
+  font-variant-numeric: tabular-nums;
+}

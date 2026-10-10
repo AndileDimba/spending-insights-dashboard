@@ -33,6 +33,7 @@ Source material lives in `docs/brief/`:
 | Runtime validation | Zod schemas at the API boundary; types are inferred from schemas | [ADR 0009](docs/adr/0009-zod-validation-at-the-api-boundary.md) |
 | Charts | Recharts, each chart with an accessible table or text alternative | [ADR 0011](docs/adr/0011-recharts-with-accessible-alternatives.md) |
 | Styling | CSS Modules with design tokens as CSS custom properties | [ADR 0010](docs/adr/0010-css-modules-and-design-tokens.md) |
+| Colours | Capitec-inspired palette with accessible variants; no Capitec name or logo | [ADR 0014](docs/adr/0014-capitec-inspired-palette.md) |
 | Unit / component tests | Vitest + React Testing Library + `@testing-library/user-event` | [ADR 0003](docs/adr/0003-test-driven-development.md) |
 | Accessibility tests | `axe-core` via `src/test/axe.ts` / `@axe-core/playwright` | [ADR 0003](docs/adr/0003-test-driven-development.md) |
 | End-to-end tests | Playwright | [ADR 0003](docs/adr/0003-test-driven-development.md) |
@@ -73,7 +74,7 @@ We work test-first. Read [ADR 0003](docs/adr/0003-test-driven-development.md) an
 
 ## API assumptions
 
-The spec has gaps. Every known gap is decided in [`docs/api-assumptions.md`](docs/api-assumptions.md) (A1 to A19), with the reasoning and the question for the backend. Read it before writing schemas, mocks or any view that shows API data, and cite decisions by ID in code comments and test names where it helps (for example `// A7: refunds are negative amounts`).
+The spec has gaps. Every known gap is decided in [`docs/api-assumptions.md`](docs/api-assumptions.md) (A1 to A20), with the reasoning and the question for the backend. Read it before writing schemas, mocks or any view that shows API data, and cite decisions by ID in code comments and test names where it helps (for example `// A7: refunds are negative amounts`).
 
 When you hit a new gap, do not guess silently. Make a decision, implement it, and add it to that document with the next ID: the gap, the decision, the reasoning and the question for the backend.
 
