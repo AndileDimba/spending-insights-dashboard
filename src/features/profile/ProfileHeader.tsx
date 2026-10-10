@@ -20,7 +20,12 @@ export function ProfileHeader() {
   const { data: profile, status, error, refetch } = useProfile()
 
   return (
-    <section className={styles.profile} aria-label="Your profile" aria-busy={status === 'pending'}>
+    <section
+      className={styles.profile}
+      data-status={status}
+      aria-label="Your profile"
+      aria-busy={status === 'pending'}
+    >
       {status === 'pending' && <Loading />}
       {status === 'error' && (
         <ErrorState

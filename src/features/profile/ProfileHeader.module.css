@@ -8,6 +8,14 @@
   box-shadow: var(--shadow-card);
 }
 
+/* The error panel has its own frame, so the card steps back rather than nest a box in a box. */
+.profile[data-status='error'] {
+  padding: 0;
+  border: 0;
+  background: none;
+  box-shadow: none;
+}
+
 .identity {
   display: flex;
   align-items: center;
