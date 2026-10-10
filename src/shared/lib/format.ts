@@ -74,3 +74,13 @@ const shortDate = new Intl.DateTimeFormat(LOCALE, {
 export function formatShortDate(date: string): string {
   return shortDate.format(new Date(`${date}T00:00:00Z`))
 }
+
+/** Formats a YYYY-MM month: 'long' gives September 2024, 'short' gives Sept. */
+export function formatMonth(_month: string, _style: 'long' | 'short' = 'long'): string {
+  return ''
+}
+
+/** Formats money briefly for chart axes, e.g. R 24K. Not for amounts a customer reads. */
+export function formatMoneyCompact(_amount: Cents, _currency: string): string {
+  return ''
+}

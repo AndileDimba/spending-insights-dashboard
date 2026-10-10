@@ -5,6 +5,8 @@ import {
   formatCount,
   formatDateTime,
   formatMoney,
+  formatMoneyCompact,
+  formatMonth,
   formatPercent,
   formatShortDate,
 } from './format'
@@ -78,5 +80,20 @@ describe('formatShortDate', () => {
     expect(formatShortDate('2024-08-16')).toBe('16 Aug 2024')
     // en-ZA abbreviates September as Sept, and its short pattern pads the day.
     expect(formatShortDate('2024-09-01')).toBe('01 Sept 2024')
+  })
+})
+
+describe('formatMonth', () => {
+  it('names a month in full, or briefly for a chart axis', () => {
+    expect(formatMonth('2024-09')).toBe('September 2024')
+    expect(formatMonth('2024-09', 'short')).toBe('Sept')
+    expect(formatMonth('2024-01', 'short')).toBe('Jan')
+  })
+})
+
+describe('formatMoneyCompact', () => {
+  it('rounds money for a chart axis', () => {
+    expect(visible(formatMoneyCompact(2397927 as Cents, 'ZAR'))).toBe('R·24K')
+    expect(visible(formatMoneyCompact(50000 as Cents, 'ZAR'))).toBe('R·500')
   })
 })
