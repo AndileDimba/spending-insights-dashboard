@@ -74,7 +74,7 @@ We work test-first. Read [ADR 0003](docs/adr/0003-test-driven-development.md) an
 
 ## API assumptions
 
-The spec has gaps. Every known gap is decided in [`docs/api-assumptions.md`](docs/api-assumptions.md) (A1 to A19), with the reasoning and the question for the backend. Read it before writing schemas, mocks or any view that shows API data, and cite decisions by ID in code comments and test names where it helps (for example `// A7: refunds are negative amounts`).
+The spec has gaps. Every known gap is decided in [`docs/api-assumptions.md`](docs/api-assumptions.md) (A1 to A20), with the reasoning and the question for the backend. Read it before writing schemas, mocks or any view that shows API data, and cite decisions by ID in code comments and test names where it helps (for example `// A7: refunds are negative amounts`).
 
 When you hit a new gap, do not guess silently. Make a decision, implement it, and add it to that document with the next ID: the gap, the decision, the reasoning and the question for the backend.
 

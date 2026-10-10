@@ -27,6 +27,7 @@ Each decision has an ID (A1, A2, ...) so code comments and tests can refer to it
 | A17 | Profile `totalSpent` | Lifetime spending since `joinDate` |
 | A18 | Precision of amounts | At most two decimal places |
 | A19 | Example data does not agree across endpoints | Examples show shape only; mocks are consistent |
+| A20 | The summary endpoint takes no date range | Summary cards stay on a preset period and say so when a custom range is chosen |
 
 ## Cross-cutting decisions
 
@@ -83,7 +84,14 @@ Each decision has an ID (A1, A2, ...) so code comments and tests can refer to it
 - **Decision:** it is lifetime spending since `joinDate`, shown in the profile header as "Total spent since joining".
 - **Question for the backend:** is it lifetime, or a rolling window?
 
-### A2. Categories: `period` and `startDate`/`endDate` together
+### A20. Summary: no custom date range
+
+- **Gap:** `/spending/summary` accepts only `period`, while `/spending/categories` and `/transactions` also accept `startDate` and `endDate`. When the customer chooses a custom range, the summary cannot follow it. Found while building the period selector (#15).
+- **Decision:** a custom range applies to the views whose endpoints accept one. The summary cards keep the default period (last 30 days) and say so beside them, so the page never shows two different periods without saying which is which. They are not computed on the client from transactions, because that would mean fetching every page of transactions and recalculating totals the API already owns.
+- **Reasoning:** an honest label is better than numbers that silently disagree with the categories below them.
+- **Question for the backend:** can the summary accept `startDate` and `endDate` like the categories endpoint?
+
+### A2. Categories:  and / together
 
 - **Gap:** `/spending/categories` accepts both a period and a custom range. Precedence is not defined.
 - **Decision:** when both `startDate` and `endDate` are sent, they win and `period` is ignored. Sending only one of them is a 400 (A9). The client never sends both kinds: it sends either `period` or the two dates.
