@@ -1,3 +1,4 @@
+import { CategoryBreakdown } from '@/features/categories'
 import { PeriodSelector } from '@/features/period'
 import { ProfileHeader } from '@/features/profile'
 import { SpendingSummary } from '@/features/summary'
@@ -10,6 +11,7 @@ export function OverviewPage() {
       <ProfileHeader />
       <PeriodSelector />
       <SpendingSummary />
+      <CategoryBreakdown />
     </Page>
   )
 }
