@@ -119,6 +119,12 @@ fi
 echo "Health"
 status="$(fetch /healthz)"
 expect_status "GET /healthz" "$status" 200
+# A 200 alone could be the app shell from the client-side route fallback.
+if [ "$(tr -d '\n' < "$body_file")" = "ok" ]; then
+  pass "Health check answers ok, not the app"
+else
+  fail "Health check answers ok, not the app"
+fi
 
 if [ "$failures" -gt 0 ]; then
   printf '\n%s check(s) failed.\n' "$failures"
