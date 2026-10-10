@@ -1,6 +1,8 @@
 import { screen } from '@testing-library/react'
-import { describe, expect, it } from 'vitest'
+import { beforeEach, describe, expect, it } from 'vitest'
 
+import { createHandlers } from '@/mocks/handlers'
+import { server } from '@/mocks/node'
 import { expectNoAccessibilityViolations } from '@/test/axe'
 import { renderRoutes } from '@/test/render'
 
@@ -9,6 +11,11 @@ import { routes } from './routes'
 
 // Scenarios of #13. "No horizontal scrolling at 360px" needs a real layout
 // engine, so it is covered by the Playwright tests in #23.
+
+// Pages fetch their data, so every test here runs against the mock API.
+beforeEach(() => {
+  server.use(...createHandlers({ seed: 1, now: () => new Date('2024-09-16T12:00:00Z') }))
+})
 
 describe('skip link', () => {
   it('is the first thing Tab reaches, and moves focus to the main region', async () => {
