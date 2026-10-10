@@ -15,6 +15,11 @@
   --color-accent: #0084bb; /* Brand blue: graphics and highlights, not text */
   --color-brand-red: #eb423e; /* Accent only: below 4.5:1 for text on white */
 
+  /* Header: the brand bar in light mode, kept dark in dark mode */
+  --color-header: #004973;
+  --color-on-header: #ffffff;
+  --color-header-accent: #004973;
+
   /* Surfaces and text */
   --color-bg: #f5f7fa;
   --color-surface: #ffffff;
@@ -75,6 +80,12 @@
     --color-on-primary: #0f1720;
     --color-accent: #4fb3e8;
     --color-brand-red: #f2635f;
+
+    /* A bright header is the most glaring thing on a dark screen, so it stays
+       dark here and carries the brand as a blue line along its bottom edge. */
+    --color-header: #0b2a3f;
+    --color-on-header: #eceff3;
+    --color-header-accent: #4fb3e8;
 
     --color-bg: #0f1720;
     --color-surface: #17212c;
