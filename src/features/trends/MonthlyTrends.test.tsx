@@ -116,11 +116,13 @@ describe('MonthlyTrends', () => {
     expect(rows[1]).toHaveTextContent('R 92,62')
   })
 
-  it('labels the current month as incomplete (A4)', async () => {
+  it('labels the current month as incomplete, in the table and under the chart (A4)', async () => {
     respondWith(trends())
     const { user } = renderWithProviders(<MonthlyTrends />)
 
-    await user.click(await screen.findByText('Show as table'))
+    // Its low bar is a month in progress, not a drop in spending.
+    expect(await screen.findByText('June 2024 is the month so far.')).toBeInTheDocument()
+    await user.click(screen.getByText('Show as table'))
 
     expect(screen.getByRole('rowheader', { name: 'June 2024 (so far)' })).toBeInTheDocument()
   })
