@@ -62,3 +62,8 @@ export function formatPercent(points: number): string {
 export function formatCount(value: number): string {
   return count.format(value)
 }
+
+/** Formats a calendar date (YYYY-MM-DD) briefly, e.g. 16 Aug 2024. */
+export function formatShortDate(_date: string): string {
+  return ''
+}

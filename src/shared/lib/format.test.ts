@@ -6,6 +6,7 @@ import {
   formatDateTime,
   formatMoney,
   formatPercent,
+  formatShortDate,
 } from './format'
 import type { Cents } from './money'
 
@@ -69,5 +70,13 @@ describe('formatCount', () => {
   it('groups thousands with a non-breaking space', () => {
     expect(visible(formatCount(1250))).toBe('1·250')
     expect(formatCount(47)).toBe('47')
+  })
+})
+
+describe('formatShortDate', () => {
+  it('formats a calendar date briefly, as en-ZA abbreviates it', () => {
+    expect(formatShortDate('2024-08-16')).toBe('16 Aug 2024')
+    // en-ZA abbreviates September as Sept, and its short pattern pads the day.
+    expect(formatShortDate('2024-09-01')).toBe('01 Sept 2024')
   })
 })
