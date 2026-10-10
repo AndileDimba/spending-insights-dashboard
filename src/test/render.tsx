@@ -2,24 +2,21 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { render } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import type { ReactElement } from 'react'
-import { createMemoryRouter, RouterProvider } from 'react-router'
+import { createMemoryRouter, type RouteObject, RouterProvider } from 'react-router'
 
-interface RenderWithProvidersOptions {
+interface RenderOptions {
   /** Initial URL, including any query string, e.g. '/transactions?category=Groceries'. */
   route?: string
 }
 
 /**
- * Renders UI inside the same providers as the app: a router (so URL state
- * works) and a fresh query client per test (so no cached data leaks between
- * tests). Retries are off so error states appear immediately.
+ * Renders a route tree inside the same providers as the app: a router (so URL
+ * state and navigation work) and a fresh query client per test (so no cached
+ * data leaks between tests). Retries are off so error states appear at once.
  */
-export function renderWithProviders(
-  ui: ReactElement,
-  { route = '/' }: RenderWithProvidersOptions = {},
-) {
+export function renderRoutes(routes: RouteObject[], { route = '/' }: RenderOptions = {}) {
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } })
-  const router = createMemoryRouter([{ path: '*', element: ui }], { initialEntries: [route] })
+  const router = createMemoryRouter(routes, { initialEntries: [route] })
   const user = userEvent.setup()
 
   const view = render(
@@ -29,4 +26,9 @@ export function renderWithProviders(
   )
 
   return { ...view, user, router, queryClient }
+}
+
+/** Renders one piece of UI at any URL, with the app's providers. */
+export function renderWithProviders(ui: ReactElement, options: RenderOptions = {}) {
+  return renderRoutes([{ path: '*', element: ui }], options)
 }
