@@ -6,6 +6,12 @@
   gap: var(--space-3);
 }
 
+.pager {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
 .button {
   min-height: var(--target-size);
   padding: 0 var(--space-4);

@@ -22,38 +22,41 @@ export function TransactionPagination({
 }: TransactionPaginationProps) {
   return (
     <nav className={styles.pagination} aria-label="Pages">
-      <button
-        type="button"
-        className={styles.button}
-        disabled={page <= 1}
-        onClick={() => {
-          onPage(page - 1)
-        }}
-        // A label rather than hidden text: the space before a hidden " page" is
-        // dropped when the name is computed, giving "Previouspage". The visible
-        // word stays part of the name (WCAG 2.5.3).
-        aria-label="Previous page"
-      >
-        <span aria-hidden="true">‹ </span>
-        Previous
-      </button>
+      {/* Previous, where you are and Next stay together; the page size sits apart. */}
+      <div className={styles.pager}>
+        <button
+          type="button"
+          className={styles.button}
+          disabled={page <= 1}
+          onClick={() => {
+            onPage(page - 1)
+          }}
+          // A label rather than hidden text: the space before a hidden " page" is
+          // dropped when the name is computed, giving "Previouspage". The visible
+          // word stays part of the name (WCAG 2.5.3).
+          aria-label="Previous page"
+        >
+          <span aria-hidden="true">‹ </span>
+          Previous
+        </button>
 
-      <p className={styles.position}>
-        Page {page} of {totalPages}
-      </p>
+        <p className={styles.position}>
+          Page {page} of {totalPages}
+        </p>
 
-      <button
-        type="button"
-        className={styles.button}
-        disabled={!hasMore}
-        onClick={() => {
-          onPage(page + 1)
-        }}
-        aria-label="Next page"
-      >
-        Next
-        <span aria-hidden="true"> ›</span>
-      </button>
+        <button
+          type="button"
+          className={styles.button}
+          disabled={!hasMore}
+          onClick={() => {
+            onPage(page + 1)
+          }}
+          aria-label="Next page"
+        >
+          Next
+          <span aria-hidden="true"> ›</span>
+        </button>
+      </div>
 
       <label className={styles.size}>
         <span>Per page</span>
