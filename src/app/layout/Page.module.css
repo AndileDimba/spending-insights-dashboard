@@ -1,0 +1,9 @@
+.page {
+  display: grid;
+  gap: var(--space-6);
+}
+
+.title {
+  font-size: var(--font-size-xl);
+  line-height: 1.2;
+}

@@ -1,3 +1,9 @@
+import { Page } from '../layout/Page'
+
 export function TransactionsPage() {
-  return null
+  return (
+    <Page title="Transactions">
+      <p>Every transaction, with filters, sorting and paging.</p>
+    </Page>
+  )
 }

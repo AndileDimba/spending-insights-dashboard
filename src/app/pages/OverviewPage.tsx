@@ -1,3 +1,9 @@
+import { Page } from '../layout/Page'
+
 export function OverviewPage() {
-  return null
+  return (
+    <Page title="Overview">
+      <p>Your spending summary, categories, budgets and trends.</p>
+    </Page>
+  )
 }
