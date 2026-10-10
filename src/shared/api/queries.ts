@@ -85,12 +85,17 @@ export function useTrends(input: Parameters<typeof trendsParams>[0]) {
 }
 
 /** The previous page stays on screen while the next one loads (NFR P7). */
-export function useTransactions(input: Parameters<typeof transactionsParams>[0]) {
+export function useTransactions(
+  input: Parameters<typeof transactionsParams>[0],
+  /** False holds the request, for example until a category can be validated (A13). */
+  { enabled = true }: { enabled?: boolean } = {},
+) {
   const params = transactionsParams(input)
   return useQuery({
     queryKey: queryKeys.transactions(params),
     queryFn: ({ signal }) => getJson('/transactions', transactionsSchema, { params, signal }),
     placeholderData: keepPreviousData,
+    enabled,
   })
 }
 

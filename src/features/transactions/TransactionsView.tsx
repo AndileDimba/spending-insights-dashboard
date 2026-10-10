@@ -4,20 +4,32 @@ import { categoryColour } from '@/features/categories'
 import { useProfile, useTransactions } from '@/shared/api/queries'
 import type { Transaction } from '@/shared/api/schemas'
 import { useMediaQuery } from '@/shared/hooks/useMediaQuery'
-import { formatDateTime, formatMoney } from '@/shared/lib/format'
+import { formatCount, formatDateTime, formatMoney } from '@/shared/lib/format'
 import type { Cents } from '@/shared/lib/money'
 import { ErrorState } from '@/shared/ui/ErrorState'
 import { Skeleton } from '@/shared/ui/Skeleton'
 import { VisuallyHidden } from '@/shared/ui/VisuallyHidden'
 
+import { TransactionFilters } from './TransactionFilters'
 import styles from './TransactionsView.module.css'
+import { useTransactionFilters } from './useTransactionFilters'
 
 /** Matches the breakpoint where the layout has room for five columns. */
 const WIDE = '(min-width: 48rem)'
 
-/** The transactions list: a table on a wide screen, a list on a phone. */
+/** The transactions list, its filters and its result count. */
 export function TransactionsView() {
-  const page = useTransactions({})
+  const filters = useTransactionFilters()
+  const page = useTransactions(
+    {
+      category: filters.category,
+      startDate: filters.startDate,
+      endDate: filters.endDate,
+      sortBy: filters.sortBy,
+    },
+    // A category from the URL waits for /filters to confirm it (A13).
+    { enabled: filters.ready },
+  )
   // Amounts need the profile's currency (A3).
   const profile = useProfile()
   // One layout or the other, never both, so assistive technology meets each
@@ -32,8 +44,19 @@ export function TransactionsView() {
     if (profile.isError) void profile.refetch()
   }
 
+  const total = page.data?.pagination.total
+
   return (
     <section className={styles.view} aria-label="Transactions" aria-busy={pending}>
+      <TransactionFilters state={filters} />
+
+      {/* Announced politely when the filters change the results (WCAG 4.1.3). */}
+      <p role="status" aria-live="polite" className={styles.count}>
+        {total === undefined
+          ? ''
+          : `${formatCount(total)} ${total === 1 ? 'transaction' : 'transactions'}`}
+      </p>
+
       {failure ? (
         <ErrorState
           title="We could not load your transactions"
@@ -42,7 +65,14 @@ export function TransactionsView() {
         />
       ) : page.isSuccess && profile.isSuccess ? (
         page.data.transactions.length === 0 ? (
-          <p className={styles.empty}>No transactions match these filters</p>
+          <div className={styles.empty}>
+            <p>No transactions match these filters</p>
+            {filters.active && (
+              <button type="button" className={styles.emptyAction} onClick={filters.clear}>
+                Clear filters
+              </button>
+            )}
+          </div>
         ) : wide ? (
           <TransactionTable
             transactions={page.data.transactions}
