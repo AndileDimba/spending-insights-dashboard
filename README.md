@@ -87,3 +87,5 @@ End-to-end commands are added by the issue that introduces them (see the [roadma
 ## Licence
 
 [MIT](LICENSE)
+
+This is an independent project written for a job application. It is not affiliated with, endorsed by or connected to Capitec Bank. The colour palette is inspired by Capitec's, and no Capitec name, logo or other trademark is used ([ADR 0014](docs/adr/0014-capitec-inspired-palette.md)).
