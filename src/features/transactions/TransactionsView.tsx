@@ -121,11 +121,15 @@ function TransactionTable({ transactions, currency }: ListProps) {
           {transactions.map((transaction) => (
             <tr key={transaction.id}>
               <td className={styles.date}>{formatDateTime(transaction.date)}</td>
-              <th scope="row" className={styles.merchant}>
-                {transaction.merchant}
-                {transaction.description && (
-                  <span className={styles.description}>{transaction.description}</span>
-                )}
+              <th scope="row">
+                {/* Layout goes on an inner span: a grid on the cell itself stops
+                    it behaving as a table cell, and its borders misalign. */}
+                <span className={styles.merchant}>
+                  {transaction.merchant}
+                  {transaction.description && (
+                    <span className={styles.description}>{transaction.description}</span>
+                  )}
+                </span>
               </th>
               <td>
                 <Category transaction={transaction} />
