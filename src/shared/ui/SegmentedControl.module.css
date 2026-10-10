@@ -1,0 +1,49 @@
+.group {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.label {
+  margin-right: var(--space-1);
+  font-weight: var(--font-weight-semibold);
+}
+
+.option {
+  position: relative;
+}
+
+/* The radio stays in the page for keyboard and screen reader use; its label is what shows. */
+.input {
+  position: absolute;
+  inset: 0;
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.text {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--target-size);
+  padding: 0 var(--space-3);
+  border: 1px solid var(--color-border-strong);
+  border-radius: 999px;
+  background: var(--color-surface);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  white-space: nowrap;
+}
+
+/* Selected: a filled pill, so the state shows by shape and fill, not hue alone. */
+.input:checked + .text {
+  border-color: var(--color-primary);
+  background: var(--color-primary);
+  color: var(--color-on-primary);
+}
+
+.input:focus-visible + .text {
+  outline: 3px solid var(--color-focus);
+  outline-offset: 2px;
+}

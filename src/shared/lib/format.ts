@@ -74,3 +74,30 @@ const shortDate = new Intl.DateTimeFormat(LOCALE, {
 export function formatShortDate(date: string): string {
   return shortDate.format(new Date(`${date}T00:00:00Z`))
 }
+
+const monthFormats = {
+  long: new Intl.DateTimeFormat(LOCALE, { month: 'long', year: 'numeric', timeZone: 'UTC' }),
+  short: new Intl.DateTimeFormat(LOCALE, { month: 'short', timeZone: 'UTC' }),
+}
+
+/** Formats a YYYY-MM month: 'long' gives September 2024, 'short' gives Sept. */
+export function formatMonth(month: string, style: 'long' | 'short' = 'long'): string {
+  return monthFormats[style].format(new Date(`${month}-01T00:00:00Z`))
+}
+
+const compactMoneyFormatters = new Map<string, Intl.NumberFormat>()
+
+/** Formats money briefly for chart axes, e.g. R 24K. Not for amounts a customer reads. */
+export function formatMoneyCompact(amount: Cents, currency: string): string {
+  let formatter = compactMoneyFormatters.get(currency)
+  if (!formatter) {
+    formatter = new Intl.NumberFormat(LOCALE, {
+      style: 'currency',
+      currency,
+      notation: 'compact',
+      maximumFractionDigits: 0,
+    })
+    compactMoneyFormatters.set(currency, formatter)
+  }
+  return formatter.format(amount / 100)
+}

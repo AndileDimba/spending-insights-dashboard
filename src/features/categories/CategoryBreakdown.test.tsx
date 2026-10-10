@@ -1,6 +1,6 @@
 import { screen, within } from '@testing-library/react'
 import { delay, http, HttpResponse } from 'msw'
-import { beforeEach, describe, expect, it } from 'vitest'
+import { beforeAll, beforeEach, describe, expect, it } from 'vitest'
 
 import { server } from '@/mocks/node'
 import { categoriesSchema, profileSchema } from '@/shared/api/schemas'
@@ -17,6 +17,12 @@ const CATEGORIES_URL = '*/api/customers/12345/spending/categories'
 const categories = () => specExample(categoriesSchema, 3)
 
 let requests: URLSearchParams[] = []
+
+// The chart is loaded lazily. Its first import in jsdom takes many seconds, so
+// it is loaded once here rather than inside whichever test happens to run first.
+beforeAll(async () => {
+  await import('./CategoryChart')
+}, 60_000)
 
 function respondWith(body: object) {
   server.use(
