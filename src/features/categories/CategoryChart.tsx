@@ -33,6 +33,11 @@ export default function CategoryChart({ categories, summary }: CategoryChartProp
           nameKey="name"
           innerRadius={58}
           outerRadius={96}
+          // From 12 o'clock, clockwise: the largest category starts at the
+          // top, as the list starts with it. Recharts' default is 3 o'clock,
+          // anticlockwise.
+          startAngle={90}
+          endAngle={-270}
           // No animation, which also respects reduced motion (NFR A7).
           isAnimationActive={false}
         />
