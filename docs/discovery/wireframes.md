@@ -26,7 +26,9 @@ All filter state lives in the URL, so every view below can be bookmarked, shared
 
 ## Overview: mobile (360px)
 
-A single column. The navigation collapses behind a menu button in the header; the period selector scrolls horizontally inside its own container, never the page.
+A single column. The period selector scrolls horizontally inside its own container, never the page.
+
+> **Changed in build (#13):** the navigation stays visible below the product name instead of collapsing behind a menu button. With two destinations, a disclosure menu adds a tap, hides where you are, and adds behaviour to build and test for no gain. Revisit if the app grows past four or five destinations.
 
 ```text
 +------------------------------------+
