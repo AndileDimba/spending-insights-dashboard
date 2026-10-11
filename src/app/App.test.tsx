@@ -1,5 +1,7 @@
-import { screen } from '@testing-library/react'
-import { beforeEach, describe, expect, it } from 'vitest'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { render, screen } from '@testing-library/react'
+import { createBrowserRouter, RouterProvider } from 'react-router'
+import { beforeEach, describe, expect, it, onTestFinished } from 'vitest'
 
 import { createHandlers } from '@/mocks/handlers'
 import { server } from '@/mocks/node'
@@ -75,6 +77,25 @@ describe('navigation between pages', () => {
     await user.click(await screen.findByRole('radio', { name: '24 months' }))
 
     expect(screen.getByRole('radio', { name: '24 months' })).toHaveFocus()
+  })
+
+  // #81: the browser keeps React Router's key in history.state across a
+  // reload, so the memory router used elsewhere cannot reproduce this.
+  it('leaves focus alone when a page reached by navigation is reloaded', async () => {
+    window.history.replaceState({ usr: null, key: 'before-reload', idx: 1 }, '', '/')
+    onTestFinished(() => {
+      window.history.replaceState(null, '', '/')
+    })
+    const router = createBrowserRouter(routes)
+
+    render(
+      <QueryClientProvider client={new QueryClient()}>
+        <RouterProvider router={router} />
+      </QueryClientProvider>,
+    )
+
+    await screen.findByRole('heading', { level: 1, name: 'Overview' })
+    expect(document.body).toHaveFocus()
   })
 
   it('marks the link to the current page', () => {
