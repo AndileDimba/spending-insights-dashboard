@@ -80,6 +80,8 @@
   background: var(--color-surface);
   color: var(--color-text);
   font: inherit;
+  /* 16px or more, or iOS Safari zooms in when the control is focused (#76). */
+  font-size: var(--font-size-md);
   font-weight: var(--font-weight-regular);
 }
 
