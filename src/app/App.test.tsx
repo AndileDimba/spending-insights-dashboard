@@ -68,6 +68,15 @@ describe('navigation between pages', () => {
     expect(document.title).toBe('Transactions | Spending Insights')
   })
 
+  // #77: a query string change is not a new page, so focus must not jump.
+  it('keeps focus on a control that only changes the query string', async () => {
+    const { user } = renderRoutes(routes)
+
+    await user.click(await screen.findByRole('radio', { name: '24 months' }))
+
+    expect(screen.getByRole('radio', { name: '24 months' })).toHaveFocus()
+  })
+
   it('marks the link to the current page', () => {
     renderRoutes(routes, { route: '/transactions' })
 
