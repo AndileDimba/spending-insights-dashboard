@@ -56,7 +56,7 @@ A lightweight threat model for the dashboard, using STRIDE. It is written before
 | T10 | Tampering | **Compromised dependency or base image** | Lockfile with `npm ci`, `npm audit` gate, Dependabot, Trivy image scan, minimal runtime image | CI (#6, #8) |
 | T11 | Tampering | **Compromised CI action** | Third-party actions pinned to commit SHAs. Workflows run with read-only permissions and no secrets | CI review (#6) |
 | T12 | Elevation of privilege | **Container breakout or misuse** | Unprivileged nginx on port 8080, no shell tools beyond the base image, read-only friendly config | Docker test (#7) |
-| T13 | Tampering | **The mock service worker in the production image** intercepting requests | MSW is enabled only by an explicit build flag for the demo image, its scope is limited to the API path, and the trade-off is recorded in an ADR | ADR (#2), Docker test (#7) |
+| T13 | Tampering | **The mock API in the production image** intercepting requests | MSW is enabled only by an explicit build flag for the demo image, it handles only the API path and lets every other request through, and the trade-off is recorded in ADRs 0008 and 0016 | ADR (#2), Docker test (#7), CI check for mock code in a real build |
 | T14 | Tampering | **CSV formula injection** in exported transactions | Cells starting with `=`, `+`, `-` or `@` are escaped | Unit test (#29) |
 | T15 | Denial of service | **Oversized responses** freezing a phone | Page size capped at 100, trends at 24 months, both enforced on the client too | Tests (#10, #22) |
 | T16 | Repudiation | Disputes about what a customer did | Not applicable to a read-only client. Audit logging is the API's responsibility | n/a |

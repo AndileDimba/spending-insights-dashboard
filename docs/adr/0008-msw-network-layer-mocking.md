@@ -1,6 +1,6 @@
 # 8. Mock the API at the network layer with MSW, including in the Docker image
 
-- **Status:** Accepted
+- **Status:** Accepted. The browser mechanism (a service worker) is superseded by [ADR 0016](0016-in-page-mocks.md).
 - **Date:** 2026-10-07
 
 ## Context
