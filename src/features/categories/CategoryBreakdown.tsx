@@ -31,7 +31,11 @@ export function CategoryBreakdown() {
   }
 
   return (
-    <section className={styles.breakdown} aria-label="Spending by category" aria-busy={pending}>
+    <section
+      className={styles.breakdown}
+      aria-label="Spending by category"
+      aria-busy={pending || breakdown.isPlaceholderData}
+    >
       <div className={styles.heading}>
         <h2 className={styles.title}>Spending by category</h2>
         {breakdown.data && (

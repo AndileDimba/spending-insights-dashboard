@@ -1,4 +1,4 @@
-import { screen, within } from '@testing-library/react'
+import { act, screen, waitFor, within } from '@testing-library/react'
 import { delay, http, HttpResponse } from 'msw'
 import { beforeEach, describe, expect, it } from 'vitest'
 
@@ -161,6 +161,30 @@ describe('SpendingSummary', () => {
       'aria-busy',
       'false',
     )
+  })
+
+  // #77: swapping the cards for skeletons shrank the page under the reader.
+  it('keeps the current totals on screen while a new period loads', async () => {
+    let answer: () => void = () => undefined
+    const answered = new Promise<void>((resolve) => (answer = resolve))
+    server.use(
+      http.get(SUMMARY_URL, async ({ request }) => {
+        if (new URL(request.url).searchParams.get('period') === '7d') {
+          await answered
+        }
+        return HttpResponse.json(summary())
+      }),
+    )
+    const { router } = renderWithProviders(<SpendingSummary />)
+    await screen.findByRole('group', { name: 'Total spent' })
+
+    await act(() => router.navigate('/?period=7d'))
+
+    expect(card('Total spent')).toHaveTextContent('R 4 250,75')
+    const region = screen.getByRole('region', { name: 'Spending summary, last 7 days' })
+    expect(region).toHaveAttribute('aria-busy', 'true')
+    answer()
+    await waitFor(() => expect(region).toHaveAttribute('aria-busy', 'false'))
   })
 
   it('requests the summary again when Retry is selected after an error', async () => {

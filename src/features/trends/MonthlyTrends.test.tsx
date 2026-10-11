@@ -1,4 +1,4 @@
-import { screen, within } from '@testing-library/react'
+import { screen, waitFor, within } from '@testing-library/react'
 import { delay, http, HttpResponse } from 'msw'
 import { beforeAll, beforeEach, describe, expect, it } from 'vitest'
 
@@ -148,6 +148,29 @@ describe('MonthlyTrends', () => {
     expect(await region()).toHaveAttribute('aria-busy', 'true')
     await screen.findByRole('img')
     expect(await region()).toHaveAttribute('aria-busy', 'false')
+  })
+
+  // #77: swapping the chart for a shorter skeleton shrank the page and
+  // scrolled the reader away from the control they had just used.
+  it('keeps the current months on screen while a new range loads', async () => {
+    let answer: () => void = () => undefined
+    const answered = new Promise<void>((resolve) => (answer = resolve))
+    server.use(
+      http.get(TRENDS_URL, async ({ request }) => {
+        if (new URL(request.url).searchParams.get('months') === '24') {
+          await answered
+        }
+        return HttpResponse.json(trends())
+      }),
+    )
+    const { user } = renderWithProviders(<MonthlyTrends />)
+
+    await user.click(await screen.findByRole('radio', { name: '24 months' }))
+
+    expect(screen.getByRole('img')).toBeInTheDocument()
+    expect(await region()).toHaveAttribute('aria-busy', 'true')
+    answer()
+    await waitFor(async () => expect(await region()).toHaveAttribute('aria-busy', 'false'))
   })
 
   it('requests the months again when Retry is selected after an error', async () => {
