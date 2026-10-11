@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest'
+import { z } from 'zod'
 
 import { first, specExample } from '@/test/api-spec'
 
@@ -13,6 +14,11 @@ import {
 } from './schemas'
 
 // Decision IDs (A1, A2, ...) refer to docs/api-assumptions.md.
+
+// #85: the e2e fixture proves the CSP sees no eval; this pins the reason.
+it('configures Zod never to probe for eval, which the CSP blocks', () => {
+  expect(z.config().jitless).toBe(true)
+})
 
 const profile = () => specExample(profileSchema, 1)
 const summary = () => specExample(summarySchema, 2)
