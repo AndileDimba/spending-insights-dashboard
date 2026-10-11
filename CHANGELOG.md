@@ -6,6 +6,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+## [0.3.1] - 2026-10-11
+
+Fixes found by testing the live demo on real devices.
+
+### Fixed
+
+- Changing the period or the monthly trends range no longer scrolls the page to the top. Focus stays on the control that was used, and the summary, categories and trends keep their current data on screen, marked busy, until the new data arrives (#77).
+- Reloading a page no longer moves focus to its heading, which showed a focus ring on load. Focus moves to the heading only after going to another page (#81).
+- The health check on the Vercel demo answers `ok` instead of the app, and the smoke test now checks the response body, not only the status (#69).
+
 ## [0.3.0] - 2026-10-10
 
 Milestone 2 (Dashboard) and milestone 3 (Transactions): the app now shows a customer's spending end to end, and a public demo is set up on Vercel.
@@ -62,6 +72,7 @@ The first release, covering milestone 0 (Foundations) and milestone 1 (Data laye
 - A mock API on MSW 3: about 18 months of seeded South African transactions, every endpoint derived from one data set so the numbers agree, strict parameter validation with Problem Details, and error, empty and slow scenarios.
 - The mock API runs in the development server and in the demo Docker image (`VITE_ENABLE_MOCKS`). A real build contains no mock code, and CI checks that.
 
-[Unreleased]: https://github.com/AndileDimba/spending-insights-dashboard/compare/v0.3.0...develop
+[Unreleased]: https://github.com/AndileDimba/spending-insights-dashboard/compare/v0.3.1...develop
+[0.3.1]: https://github.com/AndileDimba/spending-insights-dashboard/compare/v0.3.0...v0.3.1
 [0.3.0]: https://github.com/AndileDimba/spending-insights-dashboard/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/AndileDimba/spending-insights-dashboard/releases/tag/v0.2.0

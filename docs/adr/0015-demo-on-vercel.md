@@ -20,7 +20,7 @@ Options considered:
 
 Option 4, at `insights.dimba.co.za`.
 
-- `vercel.json` mirrors `nginx/default.conf`: the same Content Security Policy and security headers on every response, immutable caching for hashed assets, `no-cache` for the app shell, and a fallback to the app for client-side routes that never answers a missing asset, a source map or a dotfile with the app.
+- `vercel.json` mirrors `nginx/default.conf`: the same Content Security Policy and security headers on every response, immutable caching for hashed assets, `no-cache` for the app shell, and a fallback to the app for client-side routes that never answers a missing asset, a source map or a dotfile with the app. The health check is a static `public/healthz` file, because Vercel has no equivalent of nginx's `return 200`; nginx's exact-match location still answers first in the Docker image.
 - The build sets `VITE_ENABLE_MOCKS=true` in `vercel.json` itself, so the demo cannot silently become a build without its API, and installs with `--ignore-scripts`, as CI does.
 - **Production deploys from `main`**, so the live site is always the latest tagged release. Pull requests get preview deployments.
 - The Docker smoke test (`scripts/docker-smoke-test.sh`) runs against the hosted site too, so the two runtimes are held to the same checks.
