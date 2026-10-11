@@ -6,8 +6,11 @@
   gap: var(--space-3);
 }
 
+/* min-width: 0 lets a cell shrink below its content's natural width; iOS
+   gives date inputs a wide one, which pushed the page off screen (#74). */
 .field {
   display: grid;
+  min-width: 0;
   gap: var(--space-1);
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-semibold);
@@ -16,6 +19,7 @@
 .field select,
 .field input {
   width: 100%;
+  min-width: 0;
   min-height: var(--target-size);
   padding: 0 var(--space-2);
   border: 1px solid var(--color-border-strong);
@@ -24,6 +28,16 @@
   color: var(--color-text);
   font: inherit;
   font-weight: var(--font-weight-regular);
+}
+
+/* iOS draws date inputs as native controls that ignore min-height and centre
+   their text. Without the native look they size and align like the selects. */
+.field input[type='date'] {
+  appearance: none;
+}
+
+.field input[type='date']::-webkit-date-and-time-value {
+  text-align: start;
 }
 
 .field input[aria-invalid='true'] {
