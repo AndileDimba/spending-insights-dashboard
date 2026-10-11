@@ -1,4 +1,4 @@
-import { type MouseEvent, useRef } from 'react'
+import { type MouseEvent, useEffect, useRef } from 'react'
 import { NavLink, Outlet, useLocation } from 'react-router'
 
 import { ErrorBoundary } from '@/shared/ui/ErrorBoundary'
@@ -15,6 +15,18 @@ const NAV_ITEMS = [
 export function AppLayout() {
   const main = useRef<HTMLElement>(null)
   const { pathname } = useLocation()
+  const shownPathname = useRef(pathname)
+
+  // After going to another page, focus moves to its heading so screen reader
+  // and keyboard users start at the new content, as after a full page load.
+  // The layout outlives every page, so it alone can tell a new page from the
+  // first load or a reload (#81), when focus is left alone and the skip link
+  // stays the first Tab stop. A query string change is the same page (#77).
+  useEffect(() => {
+    if (shownPathname.current === pathname) return
+    shownPathname.current = pathname
+    main.current?.querySelector('h1')?.focus()
+  }, [pathname])
 
   // Focus is moved by hand: following #main-content with a client-side router
   // does not reliably move keyboard focus in every browser.
