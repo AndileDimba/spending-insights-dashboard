@@ -21,5 +21,5 @@ test('the demo keeps answering after the browser stops its service workers', asy
   await expect(page).toHaveURL(/page=2/)
   await expect(transactions).toHaveAttribute('aria-busy', 'false')
   await expect(page.getByRole('alert')).toHaveCount(0)
-  await expect(transactions.getByRole('row').nth(1)).toBeVisible()
+  await expect(page.getByRole('navigation', { name: 'Pages' })).toContainText(/Page 2 of \d+/)
 })

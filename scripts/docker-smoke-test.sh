@@ -101,19 +101,16 @@ expect_status "Source map" "$status" 404
 status="$(fetch /.env)"
 expect_status "Dotfile" "$status" 404
 
-# The demo image is built with the mock API (ADR 0008). Set EXPECT_MOCKS=false
-# to check an image built with --build-arg VITE_ENABLE_MOCKS=false instead.
-if [ "${EXPECT_MOCKS:-true}" = "true" ]; then
-  echo "Mock service worker (demo build)"
-  status="$(fetch /mockServiceWorker.js)"
-  expect_status "GET /mockServiceWorker.js" "$status" 200
-  expect_header_contains "Mock worker" content-type javascript
-  expect_header "Mock worker" cache-control no-cache
-  expect_security_headers "Mock worker"
+# The mock API runs in the page, not in a service worker (ADR 0016). The old
+# worker's path answers 404, never the app, so browsers drop the old worker.
+echo "No mock service worker"
+status="$(fetch /mockServiceWorker.js)"
+expect_status "GET /mockServiceWorker.js" "$status" 404
+expect_security_headers "Old worker path"
+if grep -q 'id="root"' "$body_file"; then
+  fail "Old worker path is a 404, not the app"
 else
-  echo "No mock service worker (real build)"
-  status="$(fetch /mockServiceWorker.js)"
-  expect_status "GET /mockServiceWorker.js" "$status" 404
+  pass "Old worker path is a 404, not the app"
 fi
 
 echo "Health"
