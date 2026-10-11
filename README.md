@@ -19,7 +19,7 @@ npm run preview   # serve the production build locally
 
 ## Mock API
 
-There is no real backend: the API in [`docs/brief/api-spec.md`](docs/brief/api-spec.md) is mocked at the network layer with [MSW](https://mswjs.io/) ([ADR 0008](docs/adr/0008-msw-network-layer-mocking.md)). The app makes real `fetch` calls, and a service worker answers them with seeded data for one customer, relative to today. The same handlers serve the tests.
+There is no real backend: the API in [`docs/brief/api-spec.md`](docs/brief/api-spec.md) is mocked at the network layer with [MSW](https://mswjs.io/) ([ADR 0008](docs/adr/0008-msw-network-layer-mocking.md)). The app makes real `fetch` calls, and MSW answers them inside the page ([ADR 0016](docs/adr/0016-in-page-mocks.md)) with seeded data for one customer, relative to today. The same handlers serve the tests.
 
 | Build | Mock API |
 | --- | --- |
@@ -46,7 +46,7 @@ docker run --rm -p 8080:8080 --read-only --tmpfs /tmp \
   --cap-drop ALL --security-opt no-new-privileges spending-insights
 ```
 
-To check a running container (headers, caching, deep links, the mock worker, health), run `sh scripts/docker-smoke-test.sh http://localhost:8080`. For an image built with `VITE_ENABLE_MOCKS=false`, run it with `EXPECT_MOCKS=false`.
+To check a running container (headers, caching, deep links, health), run `sh scripts/docker-smoke-test.sh http://localhost:8080`.
 
 ## Commands
 
@@ -62,6 +62,7 @@ To check a running container (headers, caching, deep links, the mock worker, hea
 | Tests | `npm test` |
 | Tests in watch mode (for TDD) | `npm run test:watch` |
 | Tests with coverage report (`coverage/index.html`) | `npm run test:coverage` |
+| End-to-end tests (desktop Chromium, Chromium at 360px, WebKit as an iPhone). Install the browsers once with `npx playwright install chromium webkit`. Set `E2E_BASE_URL` to test a running container instead of a local build | `npm run test:e2e` |
 | Production build | `npm run build` |
 | Preview the production build | `npm run preview` |
 

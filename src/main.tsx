@@ -14,9 +14,9 @@ import { App } from '@/app/App'
  */
 async function startMocks(): Promise<void> {
   if (import.meta.env.DEV || import.meta.env.VITE_ENABLE_MOCKS === 'true') {
-    const { startMockWorker } = await import('@/mocks/browser')
-    // Wait for the worker before rendering, so the first requests are mocked too.
-    await startMockWorker()
+    const { startMockApi } = await import('@/mocks/browser')
+    // Start before rendering, so the first requests are mocked too.
+    await startMockApi()
   }
 }
 

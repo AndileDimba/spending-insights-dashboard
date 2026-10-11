@@ -1,0 +1,24 @@
+import { expect, expectNoAccessibilityViolations, scrollsSideways, test } from './fixtures'
+
+// #23, journey "the dashboard loads every section".
+
+const SECTIONS = [
+  'Your profile',
+  'Spending summary, last 30 days',
+  'Spending by category',
+  'Budgets',
+  'Monthly spending',
+]
+
+test('the dashboard loads every section', async ({ page }) => {
+  await page.goto('/')
+
+  await expect(page.getByRole('heading', { level: 1, name: 'Overview' })).toBeVisible()
+  for (const name of SECTIONS) {
+    const section = page.getByRole('region', { name })
+    await expect(section).toBeVisible()
+    await expect(section).toHaveAttribute('aria-busy', 'false')
+  }
+  expect(await scrollsSideways(page)).toBe(false)
+  await expectNoAccessibilityViolations(page)
+})
