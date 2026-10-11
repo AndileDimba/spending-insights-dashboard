@@ -7,3 +7,10 @@
   font-size: var(--font-size-xl);
   line-height: 1.2;
 }
+
+/* Focus moves here after a navigation so screen readers start at the new
+   page (AppLayout). A heading cannot be operated, so it needs no ring; every
+   control keeps its own (#75). */
+.title:focus {
+  outline: none;
+}
