@@ -6,6 +6,22 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+## [0.3.2] - 2026-10-11
+
+Fixes for bugs testers found on iPhones, and end-to-end tests in three browsers.
+
+### Fixed
+
+- The demo no longer stops loading data after the browser stops its service worker, which an iPhone did while paging through transactions and Chrome did to a sleeping tab. The mock API now runs inside the page (ADR 0016) (#78).
+- The transaction date filters fit an iPhone screen and line up with the selects, and the period selector's custom range gets the same fix (#74).
+- Form controls are 16px, so iOS Safari no longer zooms in when one is tapped. Pinch-to-zoom still works (#76).
+- The page heading no longer shows a focus ring after a navigation; controls keep theirs (#75).
+- Zod no longer probes for `eval`, which the Content Security Policy reported as a violation on every page load (#85).
+
+### Added
+
+- End-to-end tests with Playwright in desktop Chromium, Chromium at 360px and WebKit as an iPhone, run in CI against the Docker image. Any uncaught error, console error or CSP violation fails a test (#23, first part).
+
 ## [0.3.1] - 2026-10-11
 
 Fixes found by testing the live demo on real devices.
@@ -72,7 +88,8 @@ The first release, covering milestone 0 (Foundations) and milestone 1 (Data laye
 - A mock API on MSW 3: about 18 months of seeded South African transactions, every endpoint derived from one data set so the numbers agree, strict parameter validation with Problem Details, and error, empty and slow scenarios.
 - The mock API runs in the development server and in the demo Docker image (`VITE_ENABLE_MOCKS`). A real build contains no mock code, and CI checks that.
 
-[Unreleased]: https://github.com/AndileDimba/spending-insights-dashboard/compare/v0.3.1...develop
+[Unreleased]: https://github.com/AndileDimba/spending-insights-dashboard/compare/v0.3.2...develop
+[0.3.2]: https://github.com/AndileDimba/spending-insights-dashboard/compare/v0.3.1...v0.3.2
 [0.3.1]: https://github.com/AndileDimba/spending-insights-dashboard/compare/v0.3.0...v0.3.1
 [0.3.0]: https://github.com/AndileDimba/spending-insights-dashboard/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/AndileDimba/spending-insights-dashboard/releases/tag/v0.2.0
