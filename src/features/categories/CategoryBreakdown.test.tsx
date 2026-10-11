@@ -1,4 +1,4 @@
-import { screen, within } from '@testing-library/react'
+import { act, screen, waitFor, within } from '@testing-library/react'
 import { delay, http, HttpResponse } from 'msw'
 import { beforeAll, beforeEach, describe, expect, it } from 'vitest'
 
@@ -155,6 +155,30 @@ describe('CategoryBreakdown', () => {
       'aria-busy',
       'false',
     )
+  })
+
+  // #77: swapping the list for a shorter skeleton shrank the page under the reader.
+  it('keeps the current categories on screen while a new period loads', async () => {
+    let answer: () => void = () => undefined
+    const answered = new Promise<void>((resolve) => (answer = resolve))
+    server.use(
+      http.get(CATEGORIES_URL, async ({ request }) => {
+        if (new URL(request.url).searchParams.get('period') === '7d') {
+          await answered
+        }
+        return HttpResponse.json(categories())
+      }),
+    )
+    const { router } = renderWithProviders(<CategoryBreakdown />)
+    await categoryList()
+
+    await act(() => router.navigate('/?period=7d'))
+
+    expect(screen.getByRole('list', { name: 'Categories by amount' })).toBeInTheDocument()
+    const region = screen.getByRole('region', { name: 'Spending by category' })
+    expect(region).toHaveAttribute('aria-busy', 'true')
+    answer()
+    await waitFor(() => expect(region).toHaveAttribute('aria-busy', 'false'))
   })
 
   it('requests the categories again when Retry is selected after an error', async () => {

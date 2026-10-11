@@ -48,7 +48,11 @@ export function MonthlyTrends() {
   }
 
   return (
-    <section className={styles.trends} aria-label="Monthly spending" aria-busy={pending}>
+    <section
+      className={styles.trends}
+      aria-label="Monthly spending"
+      aria-busy={pending || trends.isPlaceholderData}
+    >
       <div className={styles.heading}>
         <h2 className={styles.title}>Monthly spending</h2>
         <SegmentedControl label="Range" options={RANGES} value={months} onChange={chooseRange} />
@@ -61,7 +65,13 @@ export function MonthlyTrends() {
           onRetry={retry}
         />
       ) : trends.isSuccess && profile.isSuccess ? (
-        <Details trends={trends.data} requested={months} currency={profile.data.currency} />
+        <Details
+          trends={trends.data}
+          // The previous range stays on screen while a new one loads, and
+          // comparing its months with the new range would be wrong.
+          requested={trends.isPlaceholderData ? trends.data.trends.length : months}
+          currency={profile.data.currency}
+        />
       ) : (
         <Loading />
       )}
