@@ -29,7 +29,7 @@ Source material lives in `docs/brief/`:
 | Routing | React Router | [ADR 0007](docs/adr/0007-server-state-and-url-state.md) |
 | Server state | TanStack Query (no server data in global client state) | [ADR 0007](docs/adr/0007-server-state-and-url-state.md) |
 | URL state | Filters, period, pagination and sorting live in the URL query string | [ADR 0007](docs/adr/0007-server-state-and-url-state.md) |
-| API mocking | MSW (Mock Service Worker) at the network layer, in dev, tests and the Docker image | [ADR 0008](docs/adr/0008-msw-network-layer-mocking.md) |
+| API mocking | MSW at the network layer, in dev, tests and the Docker image; in the browser it patches `fetch` in the page, not a service worker | [ADR 0008](docs/adr/0008-msw-network-layer-mocking.md), [ADR 0016](docs/adr/0016-in-page-mocks.md) |
 | Runtime validation | Zod schemas at the API boundary; types are inferred from schemas | [ADR 0009](docs/adr/0009-zod-validation-at-the-api-boundary.md) |
 | Charts | Recharts, each chart with an accessible table or text alternative | [ADR 0011](docs/adr/0011-recharts-with-accessible-alternatives.md) |
 | Styling | CSS Modules with design tokens as CSS custom properties | [ADR 0010](docs/adr/0010-css-modules-and-design-tokens.md) |
