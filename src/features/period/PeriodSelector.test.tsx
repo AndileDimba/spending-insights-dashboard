@@ -1,4 +1,4 @@
-import { screen } from '@testing-library/react'
+import { screen, waitFor } from '@testing-library/react'
 import { http, HttpResponse } from 'msw'
 import { beforeEach, describe, expect, it } from 'vitest'
 
@@ -42,7 +42,9 @@ describe('PeriodSelector', () => {
 
     await router.navigate(-1)
 
-    expect(await screen.findByRole('radio', { name: 'Last 30 days' })).toBeChecked()
+    // The radio is always present, so findByRole would not wait for the
+    // back navigation to re-render; under load the check ran too early.
+    await waitFor(() => expect(screen.getByRole('radio', { name: 'Last 30 days' })).toBeChecked())
   })
 
   it('selects the period from a deep link', async () => {
