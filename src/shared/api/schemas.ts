@@ -6,6 +6,11 @@ import { type Cents, roundToCents, toCents } from '@/shared/lib/money'
 // response is parsed with these before it reaches the query cache (ADR 0009).
 // Decisions referenced as A1, A2, ... are in docs/api-assumptions.md.
 
+// Zod otherwise probes for eval with Function(''), which our CSP blocks and
+// reports as a violation on every page load. Without it Zod parses the same
+// way, only without its compiled fast path, which these payloads do not need (#85).
+z.config({ jitless: true })
+
 // ---- Building blocks --------------------------------------------------------
 
 export const periodSchema = z.enum(['7d', '30d', '90d', '1y'])
