@@ -60,27 +60,33 @@ export function useProfile() {
   })
 }
 
+/** The current figures stay on screen while another period loads (#77). */
 export function useSpendingSummary(input: Parameters<typeof summaryParams>[0]) {
   const params = summaryParams(input)
   return useQuery({
     queryKey: queryKeys.summary(params),
     queryFn: ({ signal }) => getJson('/spending/summary', summarySchema, { params, signal }),
+    placeholderData: keepPreviousData,
   })
 }
 
+/** The current categories stay on screen while another period loads (#77). */
 export function useCategoryBreakdown(input: Parameters<typeof categoriesParams>[0]) {
   const params = categoriesParams(input)
   return useQuery({
     queryKey: queryKeys.categories(params),
     queryFn: ({ signal }) => getJson('/spending/categories', categoriesSchema, { params, signal }),
+    placeholderData: keepPreviousData,
   })
 }
 
+/** The current months stay on screen while another range loads (#77). */
 export function useTrends(input: Parameters<typeof trendsParams>[0]) {
   const params = trendsParams(input)
   return useQuery({
     queryKey: queryKeys.trends(params),
     queryFn: ({ signal }) => getJson('/spending/trends', trendsSchema, { params, signal }),
+    placeholderData: keepPreviousData,
   })
 }
 

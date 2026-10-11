@@ -64,7 +64,7 @@ export function SpendingSummary() {
     <section
       className={styles.summary}
       aria-label={`Spending summary, ${label.toLowerCase()}`}
-      aria-busy={pending}
+      aria-busy={pending || summary.isPlaceholderData}
     >
       <div className={styles.heading}>
         <h2 className={styles.title}>Spending summary</h2>

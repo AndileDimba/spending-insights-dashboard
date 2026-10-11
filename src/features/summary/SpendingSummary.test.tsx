@@ -166,10 +166,11 @@ describe('SpendingSummary', () => {
   // #77: swapping the cards for skeletons shrank the page under the reader.
   it('keeps the current totals on screen while a new period loads', async () => {
     let answer: () => void = () => undefined
+    const answered = new Promise<void>((resolve) => (answer = resolve))
     server.use(
       http.get(SUMMARY_URL, async ({ request }) => {
         if (new URL(request.url).searchParams.get('period') === '7d') {
-          await new Promise<void>((resolve) => (answer = resolve))
+          await answered
         }
         return HttpResponse.json(summary())
       }),

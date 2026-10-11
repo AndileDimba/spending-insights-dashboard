@@ -154,10 +154,11 @@ describe('MonthlyTrends', () => {
   // scrolled the reader away from the control they had just used.
   it('keeps the current months on screen while a new range loads', async () => {
     let answer: () => void = () => undefined
+    const answered = new Promise<void>((resolve) => (answer = resolve))
     server.use(
       http.get(TRENDS_URL, async ({ request }) => {
         if (new URL(request.url).searchParams.get('months') === '24') {
-          await new Promise<void>((resolve) => (answer = resolve))
+          await answered
         }
         return HttpResponse.json(trends())
       }),

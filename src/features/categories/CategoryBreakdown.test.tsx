@@ -160,10 +160,11 @@ describe('CategoryBreakdown', () => {
   // #77: swapping the list for a shorter skeleton shrank the page under the reader.
   it('keeps the current categories on screen while a new period loads', async () => {
     let answer: () => void = () => undefined
+    const answered = new Promise<void>((resolve) => (answer = resolve))
     server.use(
       http.get(CATEGORIES_URL, async ({ request }) => {
         if (new URL(request.url).searchParams.get('period') === '7d') {
-          await new Promise<void>((resolve) => (answer = resolve))
+          await answered
         }
         return HttpResponse.json(categories())
       }),
