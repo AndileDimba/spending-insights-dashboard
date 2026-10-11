@@ -1,7 +1,7 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { render, screen } from '@testing-library/react'
 import { createBrowserRouter, RouterProvider } from 'react-router'
-import { beforeEach, describe, expect, it, onTestFinished } from 'vitest'
+import { beforeAll, beforeEach, describe, expect, it, onTestFinished } from 'vitest'
 
 import { createHandlers } from '@/mocks/handlers'
 import { server } from '@/mocks/node'
@@ -14,9 +14,18 @@ import { routes } from './routes'
 // Scenarios of #13. "No horizontal scrolling at 360px" needs a real layout
 // engine, so it is covered by the Playwright tests in #23.
 
+const mockApi = () => createHandlers({ seed: 1, now: () => new Date('2024-09-16T12:00:00Z') })
+
+// The overview's charts are loaded lazily, and importing the chart library
+// for the first time takes many seconds under a full test run. Loading it
+// here keeps that out of the first test's timeout, as the chart tests do.
+beforeAll(async () => {
+  await import('recharts')
+}, 60_000)
+
 // Pages fetch their data, so every test here runs against the mock API.
 beforeEach(() => {
-  server.use(...createHandlers({ seed: 1, now: () => new Date('2024-09-16T12:00:00Z') }))
+  server.use(...mockApi())
 })
 
 describe('skip link', () => {
