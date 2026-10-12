@@ -126,7 +126,15 @@ function Details({ trends: { trends }, requested, currency }: DetailsProps) {
 
       <details className={styles.details}>
         <summary>Show as table</summary>
-        <div className={styles.tableScroll}>
+        {/* On a phone the table is wider than its card and scrolls sideways
+            here. Focusable and named, so keyboard users can reach it and
+            scroll it with the arrow keys (WCAG 2.1.1). */}
+        <div
+          className={styles.tableScroll}
+          role="region"
+          aria-label="Monthly spending table"
+          tabIndex={0}
+        >
           <table className={styles.table}>
             <caption className={styles.caption}>Monthly spending</caption>
             <thead>
