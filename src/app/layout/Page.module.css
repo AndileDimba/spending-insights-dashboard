@@ -1,5 +1,9 @@
+/* One column that never grows past the screen. Without minmax(0, ...), a
+   grid column widens to fit its widest content, so a wide table stretched
+   the page instead of scrolling inside its own card. */
 .page {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: var(--space-6);
 }
 
