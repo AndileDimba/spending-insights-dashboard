@@ -96,6 +96,9 @@ echo "Things that must not be served"
 status="$(fetch /assets/does-not-exist.js)"
 expect_status "Missing asset (not the index page)" "$status" 404
 expect_security_headers "404 response"
+# Outside /assets/ too: only extensionless paths are client-side routes (#93).
+status="$(fetch /does-not-exist.js)"
+expect_status "Missing root file (not the index page)" "$status" 404
 status="$(fetch /assets/index.js.map)"
 expect_status "Source map" "$status" 404
 status="$(fetch /.env)"
