@@ -9,16 +9,35 @@ import { expect, type Page, test as base } from '@playwright/test'
  */
 export const test = base.extend<{ problems: string[] }>({
   problems: [
-    async ({ page }, use) => {
+    async ({ page, browserName }, use) => {
+      // WebKit reports a CSP violation for the internal styles it draws every
+      // <select> with, even on a blank page (#103, canary in
+      // webkit-select.spec.ts). Only that report is ignored, and only in
+      // WebKit: our code is the same in every engine, so the Chromium
+      // projects still catch any inline style it adds.
+      const isWebKitSelectReport = (text: string) =>
+        browserName === 'webkit' &&
+        (text === 'CSP violation: style-src-attr blocked inline' ||
+          text.startsWith(
+            "Console error: Refused to apply a stylesheet because its hash, its nonce, or 'unsafe-inline'",
+          ))
       const problems: string[] = []
-      page.on('pageerror', (error) => problems.push(`Uncaught: ${error.message}`))
+      const record = (problem: string, kind = problem) => {
+        if (!isWebKitSelectReport(kind)) problems.push(problem)
+      }
+      page.on('pageerror', (error) => {
+        record(`Uncaught: ${error.message}`)
+      })
       page.on('console', (message) => {
-        if (message.type() === 'error') problems.push(`Console error: ${message.text()}`)
+        if (message.type() === 'error') record(`Console error: ${message.text()}`)
       })
       await page.exposeFunction(
         'reportCspViolation',
         (directive: string, uri: string, source: string) => {
-          problems.push(`CSP violation: ${directive} blocked ${uri} in ${source}`)
+          record(
+            `CSP violation: ${directive} blocked ${uri} in ${source}`,
+            `CSP violation: ${directive} blocked ${uri}`,
+          )
         },
       )
       await page.addInitScript(() => {
