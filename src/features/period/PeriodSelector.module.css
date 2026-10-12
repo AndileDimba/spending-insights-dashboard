@@ -53,10 +53,13 @@
   outline-offset: 2px;
 }
 
+/* The same columns as the transaction filters: the layout, not the browser's
+   date control, decides how wide the fields are. An empty iOS date input has
+   almost no width of its own (#95). */
 .custom {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: flex-end;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 9.5rem), 1fr));
+  align-items: end;
   gap: var(--space-3);
 }
 
@@ -70,8 +73,8 @@
 }
 
 .field input {
+  width: 100%;
   min-width: 0;
-  max-width: 100%;
   appearance: none;
   min-height: var(--target-size);
   padding: 0 var(--space-2);
@@ -102,7 +105,7 @@
 }
 
 .error {
-  flex-basis: 100%;
+  grid-column: 1 / -1;
   color: var(--color-danger);
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-semibold);
