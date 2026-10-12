@@ -22,3 +22,19 @@ test('the dashboard loads every section', async ({ page }) => {
   expect(await scrollsSideways(page)).toBe(false)
   await expectNoAccessibilityViolations(page)
 })
+
+// A tester's iPhone: with the trends table open, the page grew wider than the
+// screen, and zooming out showed the header ending short of the content.
+test('the monthly spending table scrolls inside its card, not the page', async ({ page }) => {
+  await page.goto('/?months=24')
+  await expect(page.getByRole('region', { name: 'Monthly spending' })).toHaveAttribute(
+    'aria-busy',
+    'false',
+  )
+
+  await page.getByText('Show as table').click()
+
+  await expect(page.getByRole('table', { name: 'Monthly spending' })).toBeVisible()
+  expect(await scrollsSideways(page)).toBe(false)
+  await expectNoAccessibilityViolations(page)
+})
