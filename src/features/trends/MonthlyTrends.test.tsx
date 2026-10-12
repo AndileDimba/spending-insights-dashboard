@@ -193,6 +193,18 @@ describe('MonthlyTrends', () => {
     expect(await screen.findByRole('img')).toBeInTheDocument()
   })
 
+  it('lets keyboard users reach the table when it scrolls sideways (WCAG 2.1.1)', async () => {
+    respondWith(trends())
+    const { user } = renderWithProviders(<MonthlyTrends />)
+
+    await user.click(await screen.findByText('Show as table'))
+
+    expect(screen.getByRole('region', { name: 'Monthly spending table' })).toHaveAttribute(
+      'tabindex',
+      '0',
+    )
+  })
+
   it('has no detectable accessibility violations, with the table open', async () => {
     respondWith(trends())
     const { container, user } = renderWithProviders(<MonthlyTrends />)

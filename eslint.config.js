@@ -155,6 +155,11 @@ export default defineConfig([
   {
     files: ['src/**/*.tsx'],
     extends: [jsxA11y.flatConfigs.strict, reactRefresh.configs.vite],
+    rules: {
+      // A named region that scrolls must be focusable so keyboard users can
+      // scroll it (axe scrollable-region-focusable, WCAG 2.1.1).
+      'jsx-a11y/no-noninteractive-tabindex': ['error', { roles: ['tabpanel', 'region'] }],
+    },
   },
 
   {

@@ -1,5 +1,9 @@
+/* minmax(0, 1fr): a plain grid column grows to fit its widest content, so
+   the open table would stretch the section past the screen instead of
+   scrolling inside .tableScroll. */
 .trends {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: var(--space-3);
 }
 
@@ -17,6 +21,7 @@
 
 .card {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: var(--space-3);
   padding: var(--space-4);
   border: 1px solid var(--color-border);
