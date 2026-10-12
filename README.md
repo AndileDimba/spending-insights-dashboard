@@ -28,7 +28,7 @@ There is no real backend: the API in [`docs/brief/api-spec.md`](docs/brief/api-s
 | `VITE_ENABLE_MOCKS=true npm run build` | On |
 | Docker image | On by default; `--build-arg VITE_ENABLE_MOCKS=false` for a real deployment |
 
-To see the failure states, open any page with `?mock=error`, `?mock=empty` or `?mock=slow`.
+To see the failure states, open any page with `?mock=error`, `?mock=empty` or `?mock=slow`. `?mock=recover` fails every request until the automatic retries are used up, so the error state appears and "Try again" works.
 
 ## Run with Docker
 

@@ -1,6 +1,7 @@
 import { delay, http, type HttpHandler, HttpResponse, type JsonBodyType } from 'msw'
 import { z } from 'zod'
 
+import { MAX_RETRIES } from '@/shared/api/client'
 import { SORT_ORDERS, type SortBy } from '@/shared/api/params'
 import { type Period, periodSchema } from '@/shared/api/schemas'
 import type { Cents } from '@/shared/lib/money'
@@ -22,8 +23,15 @@ import {
 // 400 Problem Details where a real API should (A5, A9), so tests prove the
 // client never relies on the server to fix its input.
 
-/** How the mock API behaves: normally, with no data, failing, or slowly. */
-export type MockScenario = 'normal' | 'empty' | 'error' | 'slow'
+/**
+ * How the mock API behaves: normally, with no data, failing, slowly, or
+ * failing until the user retries ('recover').
+ */
+export type MockScenario = 'normal' | 'empty' | 'error' | 'slow' | 'recover'
+
+// In the recover scenario, every attempt the client makes by itself fails,
+// so the error state shows, and the user's "Try again" is the one that works.
+const FAILURES_BEFORE_RECOVERY = MAX_RETRIES + 1
 
 export interface MockApiOptions {
   seed?: number
@@ -222,11 +230,24 @@ export function createHandlers({
     return cached.dataset
   }
 
+  // Attempts so far per request (path and query), for the recover scenario.
+  const attempts = new Map<string, number>()
+  function failsBeforeRecovery(request: Request): boolean {
+    const { pathname, search } = new URL(request.url)
+    const attempt = (attempts.get(pathname + search) ?? 0) + 1
+    attempts.set(pathname + search, attempt)
+    return attempt <= FAILURES_BEFORE_RECOVERY
+  }
+
   return Object.entries(answers).map(([path, answer]) =>
     http.get(`*/api/customers/:customerId${path}`, async ({ params, request }) => {
       if (scenario === 'slow') await delay(slowDelayMs)
-      if (scenario === 'error') {
-        return problem(500, 'Internal Server Error', 'The mock API is running the error scenario.')
+      if (scenario === 'error' || (scenario === 'recover' && failsBeforeRecovery(request))) {
+        return problem(
+          500,
+          'Internal Server Error',
+          `The mock API is running the ${scenario} scenario.`,
+        )
       }
       // One signed-in customer (A6).
       if (params.customerId !== CUSTOMER.customerId) {

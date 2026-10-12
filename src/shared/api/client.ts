@@ -129,7 +129,7 @@ export async function getJson<S extends ZodType, P extends QueryParams<P> = Reco
   }
 }
 
-const MAX_RETRIES = 2
+export const MAX_RETRIES = 2
 
 /** Retry only failures that a second attempt can fix (NFR R4). */
 export function shouldRetry(failureCount: number, error: unknown): boolean {

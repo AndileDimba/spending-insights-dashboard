@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import type { ZodType } from 'zod'
 
+import { MAX_RETRIES } from '@/shared/api/client'
 import {
   categoriesSchema,
   filtersSchema,
@@ -200,6 +201,18 @@ describe('failure modes can be demonstrated', () => {
       topCategory: null,
     })
     expect(transactionsSchema.parse((await get('/transactions')).body).transactions).toEqual([])
+  })
+
+  it('fails each request until the client has used its retries, then answers, in the recover scenario', async () => {
+    useMockApi({ scenario: 'recover' })
+
+    for (let attempt = 0; attempt <= MAX_RETRIES; attempt += 1) {
+      expect((await get('/profile')).status).toBe(500)
+    }
+    // The next attempt is the user's "Try again".
+    expect((await get('/profile')).status).toBe(200)
+    // Counted per request, so a different one still fails at first.
+    expect((await get('/goals')).status).toBe(500)
   })
 
   it('waits before answering in the slow scenario', async () => {
