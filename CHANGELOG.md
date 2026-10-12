@@ -6,6 +6,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+## [0.3.3] - 2026-10-12
+
+### Fixed
+
+- The custom range's From and To fields no longer collapse on an iPhone. They take their width from the layout, as the transaction filters do (#95, a regression from #74).
+- A missing file anywhere, not only under `/assets/`, is a 404 on both Vercel and nginx instead of the app. Only paths without a file extension fall back to the app (#93).
+
 ## [0.3.2] - 2026-10-11
 
 Fixes for bugs testers found on iPhones, and end-to-end tests in three browsers.
@@ -88,7 +95,8 @@ The first release, covering milestone 0 (Foundations) and milestone 1 (Data laye
 - A mock API on MSW 3: about 18 months of seeded South African transactions, every endpoint derived from one data set so the numbers agree, strict parameter validation with Problem Details, and error, empty and slow scenarios.
 - The mock API runs in the development server and in the demo Docker image (`VITE_ENABLE_MOCKS`). A real build contains no mock code, and CI checks that.
 
-[Unreleased]: https://github.com/AndileDimba/spending-insights-dashboard/compare/v0.3.2...develop
+[Unreleased]: https://github.com/AndileDimba/spending-insights-dashboard/compare/v0.3.3...develop
+[0.3.3]: https://github.com/AndileDimba/spending-insights-dashboard/compare/v0.3.2...v0.3.3
 [0.3.2]: https://github.com/AndileDimba/spending-insights-dashboard/compare/v0.3.1...v0.3.2
 [0.3.1]: https://github.com/AndileDimba/spending-insights-dashboard/compare/v0.3.0...v0.3.1
 [0.3.0]: https://github.com/AndileDimba/spending-insights-dashboard/compare/v0.2.0...v0.3.0
