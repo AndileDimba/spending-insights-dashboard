@@ -3,7 +3,7 @@ import { defineNetwork, InterceptorSource } from 'msw/experimental'
 
 import { createHandlers, type MockScenario } from './handlers'
 
-const SCENARIOS: readonly MockScenario[] = ['normal', 'empty', 'error', 'slow']
+const SCENARIOS: readonly MockScenario[] = ['normal', 'empty', 'error', 'slow', 'recover']
 
 /**
  * Starts the mock API in the browser (ADR 0008, ADR 0016). It patches
@@ -11,7 +11,7 @@ const SCENARIOS: readonly MockScenario[] = ['normal', 'empty', 'error', 'slow']
  * browsers stop when idle: iOS Safari did it while a tester paged through
  * transactions, and the requests then reached the network (#78).
  *
- * Opening any page with ?mock=error, ?mock=empty or ?mock=slow shows that
+ * Opening any page with ?mock=error, ?mock=empty, ?mock=slow or ?mock=recover shows that
  * failure state, which is how the demo and the e2e tests reach states a
  * working API rarely produces.
  */
