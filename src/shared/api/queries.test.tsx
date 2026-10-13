@@ -2,7 +2,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { renderHook, waitFor } from '@testing-library/react'
 import { delay, http, HttpResponse } from 'msw'
 import type { ReactNode } from 'react'
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 
 import { createHandlers } from '@/mocks/handlers'
 import { server } from '@/mocks/node'
@@ -146,6 +146,30 @@ describe('query hooks', () => {
       status: 'pending',
       fetchStatus: 'idle',
       data: undefined,
+    })
+  })
+
+  it.each<[string, () => { isFetching: boolean }]>([
+    ['profile', () => useProfile()],
+    ['summary', () => useSpendingSummary({})],
+    ['categories', () => useCategoryBreakdown({})],
+    ['trends', () => useTrends({})],
+    ['transactions', () => useTransactions({})],
+    ['goals', () => useGoals()],
+    ['filters', () => useFilters()],
+  ])('abort the %s request when its query is cancelled', async (_name, useHook) => {
+    const { queryClient, wrapper } = setup({ slowDelayMs: 200 })
+    const requests = vi.spyOn(globalThis, 'fetch')
+
+    const { result } = renderHook(useHook, { wrapper })
+    await waitFor(() => {
+      expect(requests).toHaveBeenCalled()
+    })
+    await queryClient.cancelQueries()
+
+    expect(requests.mock.calls[0]?.[1]?.signal?.aborted).toBe(true)
+    await waitFor(() => {
+      expect(result.current.isFetching).toBe(false)
     })
   })
 

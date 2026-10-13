@@ -11,8 +11,12 @@ const moneyFormatters = new Map<string, Intl.NumberFormat>()
 
 function moneyFormatter(currency: string): Intl.NumberFormat {
   let formatter = moneyFormatters.get(currency)
+  // Equivalent mutants: the cache only saves building a formatter again;
+  // without it the output is the same (#24).
+  // Stryker disable next-line ConditionalExpression
   if (!formatter) {
     formatter = new Intl.NumberFormat(LOCALE, { style: 'currency', currency })
+    // Stryker disable next-line all: equivalent, see the cache note above
     moneyFormatters.set(currency, formatter)
   }
   return formatter
@@ -90,6 +94,9 @@ const compactMoneyFormatters = new Map<string, Intl.NumberFormat>()
 /** Formats money briefly for chart axes, e.g. R 24K. Not for amounts a customer reads. */
 export function formatMoneyCompact(amount: Cents, currency: string): string {
   let formatter = compactMoneyFormatters.get(currency)
+  // Equivalent mutants: the cache only saves building a formatter again;
+  // without it the output is the same (#24).
+  // Stryker disable next-line ConditionalExpression
   if (!formatter) {
     formatter = new Intl.NumberFormat(LOCALE, {
       style: 'currency',
@@ -97,6 +104,7 @@ export function formatMoneyCompact(amount: Cents, currency: string): string {
       notation: 'compact',
       maximumFractionDigits: 0,
     })
+    // Stryker disable next-line all: equivalent, see the cache note above
     compactMoneyFormatters.set(currency, formatter)
   }
   return formatter.format(amount / 100)

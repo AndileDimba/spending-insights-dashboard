@@ -1,0 +1,52 @@
+name: Mutation tests
+
+# Mutation testing checks that the tests catch faults, not just run lines
+# (#24, ADR 0003). It takes too long for every pull request, so it runs on
+# release branches, where it gates the release, weekly on develop (Mondays,
+# 08:00 South African time), and on demand.
+on:
+  push:
+    branches: ['release/**']
+  schedule:
+    - cron: '0 6 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  stryker:
+    name: Mutation score
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          # The schedule runs against develop, where the next release is built.
+          ref: ${{ github.event_name == 'schedule' && 'develop' || github.ref }}
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci --ignore-scripts
+      # Stryker 10's Vitest runner cannot run tests by name on Vitest 5, so
+      # every mutant would survive (stryker-js#6210). Until a fixed release,
+      # this job alone runs on Vitest 4, which the whole suite passes on.
+      # Remove this step when Dependabot brings a runner with the fix.
+      - name: Use Vitest 4 for Stryker
+        run: npm install --no-save --ignore-scripts vitest@4.1.11
+      # Fails below the break threshold in stryker.config.mjs.
+      - run: npm run test:mutation
+      - name: Upload report
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: mutation-report
+          path: reports/mutation/
+          retention-days: 30
+          if-no-files-found: ignore

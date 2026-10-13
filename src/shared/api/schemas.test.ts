@@ -75,7 +75,18 @@ describe('a malformed payload is rejected, naming the field', () => {
 
     const result = transactionsSchema.safeParse(payload)
 
-    expect(result.error?.issues[0]?.path).toEqual(['transactions', 0, 'amount'])
+    expect(result.error?.issues[0]).toMatchObject({
+      path: ['transactions', 0, 'amount'],
+      code: 'custom',
+      message: 'Expected an amount with at most two decimals (A18)',
+    })
+  })
+
+  it('accepts a date range of a single day', () => {
+    const payload = categories()
+    payload.dateRange = { startDate: '2024-09-16', endDate: '2024-09-16' }
+
+    expect(categoriesSchema.safeParse(payload).success).toBe(true)
   })
 
   it('rejects a date range that ends before it starts', () => {
@@ -112,6 +123,11 @@ describe('refunds and negative amounts (A7)', () => {
       'summary total',
       () => summarySchema.safeParse({ ...summary(), totalSpent: -1 }),
       ['totalSpent'],
+    ],
+    [
+      'average transaction',
+      () => summarySchema.safeParse({ ...summary(), averageTransaction: -1 }),
+      ['averageTransaction'],
     ],
     [
       'category amount',

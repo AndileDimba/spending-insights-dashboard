@@ -1,5 +1,6 @@
 import { delay, http, HttpResponse } from 'msw'
 import { describe, expect, it, vi } from 'vitest'
+import { z } from 'zod'
 
 import { server } from '@/mocks/node'
 import { logger } from '@/shared/lib/logger'
@@ -49,6 +50,47 @@ describe('getJson', () => {
     expect(requested).toBe(`${location.origin}/api/customers/12345/profile?period=7d`)
   })
 
+  it('asks for JSON', async () => {
+    let accept: string | null = null
+    respondWith(({ request }) => {
+      accept = request.headers.get('accept')
+      return HttpResponse.json(profile())
+    })
+
+    await getJson('/profile', profileSchema)
+
+    expect(accept).toBe('application/json')
+  })
+
+  it('names every invalid field by its path, once each', async () => {
+    const log = vi.spyOn(logger, 'error')
+    const schema = z.object({ card: z.object({ last4: z.string() }), limit: z.number() })
+    server.use(
+      http.get('*/api/customers/12345/card', () =>
+        HttpResponse.json({ card: { last4: 1234 }, limit: 'high' }),
+      ),
+    )
+
+    await failureOf(getJson('/card', schema))
+
+    expect(log).toHaveBeenCalledWith('api.validation_failed', {
+      endpoint: '/card',
+      fields: 'card.last4, limit',
+    })
+  })
+
+  it('stops its timeout and its cancel listener once the request settles', async () => {
+    const stopTimer = vi.spyOn(globalThis, 'clearTimeout')
+    const controller = new AbortController()
+    const stopListening = vi.spyOn(controller.signal, 'removeEventListener')
+    respondWith(() => HttpResponse.json(profile()))
+
+    await getJson('/profile', profileSchema, { signal: controller.signal })
+
+    expect(stopTimer).toHaveBeenCalled()
+    expect(stopListening).toHaveBeenCalledWith('abort', expect.any(Function))
+  })
+
   it('turns an HTTP error into an ApiError with the status and a safe message (A5)', async () => {
     respondWith(() =>
       HttpResponse.json(
@@ -86,15 +128,22 @@ describe('getJson', () => {
   })
 
   it('treats a body that is not JSON as invalid data', async () => {
+    const log = vi.spyOn(logger, 'error')
     respondWith(() => new HttpResponse('<html>Gateway timeout</html>', { status: 200 }))
 
     await expect(getJson('/profile', profileSchema)).rejects.toMatchObject({ kind: 'validation' })
+    expect(log).toHaveBeenCalledWith('api.validation_failed', {
+      endpoint: '/profile',
+      fields: '(response is not JSON)',
+    })
   })
 
-  it('reports a network failure', async () => {
+  it('reports a network failure, logged without a status', async () => {
+    const log = vi.spyOn(logger, 'error')
     respondWith(() => HttpResponse.error())
 
     await expect(getJson('/profile', profileSchema)).rejects.toMatchObject({ kind: 'network' })
+    expect(log.mock.calls[0]?.[1]).not.toHaveProperty('status')
   })
 
   it('abandons a request that takes longer than the timeout (NFR R3)', async () => {
@@ -150,27 +199,33 @@ describe('getJson', () => {
   })
 })
 
+// The errors are built inside each test, not in the tables: a table is
+// evaluated when the tests are collected, before the test runs, so the code
+// that builds them would not count as tested (Stryker showed this, #24).
 describe('retries (NFR R4)', () => {
-  const error = (kind: ApiError['kind'], status?: number) => new ApiError(kind, '/profile', status)
+  const error = (kind: ApiError['kind'], status?: number) => () =>
+    new ApiError(kind, '/profile', status)
 
   it.each([
     ['a network failure', error('network')],
     ['a timeout', error('timeout')],
+    ['a 500', error('http', 500)],
     ['a 503', error('http', 503)],
   ])('retries %s at most twice', (_name, failure) => {
-    expect(shouldRetry(0, failure)).toBe(true)
-    expect(shouldRetry(1, failure)).toBe(true)
-    expect(shouldRetry(2, failure)).toBe(false)
+    expect(shouldRetry(0, failure())).toBe(true)
+    expect(shouldRetry(1, failure())).toBe(true)
+    expect(shouldRetry(2, failure())).toBe(false)
   })
 
   it.each([
     ['a 400', error('http', 400)],
     ['a 404', error('http', 404)],
+    ['a 499', error('http', 499)],
     ['invalid data', error('validation')],
     ['an HTTP error without a status', error('http')],
-    ['an unexpected error', new Error('bug')],
+    ['an unexpected error', () => new Error('bug')],
   ])('never retries %s, which a second attempt cannot fix', (_name, failure) => {
-    expect(shouldRetry(0, failure)).toBe(false)
+    expect(shouldRetry(0, failure())).toBe(false)
   })
 
   it('backs off exponentially: 1 second, then 2', () => {
@@ -180,12 +235,24 @@ describe('retries (NFR R4)', () => {
 
 describe('ApiError', () => {
   it.each([
-    [new ApiError('network', '/goals'), 'We could not reach the server'],
-    [new ApiError('timeout', '/goals'), 'took too long'],
-    [new ApiError('http', '/goals', 503), 'temporarily unavailable'],
-    [new ApiError('http', '/goals', 404), 'could not be found'],
-    [new ApiError('validation', '/goals'), 'could not be shown'],
-  ])('has a plain-language message: %s', (error, text) => {
-    expect(error.message).toContain(text)
+    ['network', undefined, 'We could not reach the server. Check your connection and try again.'],
+    ['timeout', undefined, 'The server took too long to respond. Please try again.'],
+    [
+      'validation',
+      undefined,
+      'We received information that could not be shown. Please try again later.',
+    ],
+    ['http', 500, 'This service is temporarily unavailable. Please try again.'],
+    ['http', 503, 'This service is temporarily unavailable. Please try again.'],
+    ['http', 404, 'The information you asked for could not be found.'],
+    ['http', 499, 'Your request could not be completed.'],
+    ['http', 400, 'Your request could not be completed.'],
+    ['http', undefined, 'Your request could not be completed.'],
+  ] as const)('a %s error with status %s says: %s', (kind, status, message) => {
+    expect(new ApiError(kind, '/goals', status).message).toBe(message)
+  })
+
+  it('is named, so it can be told apart from other errors', () => {
+    expect(new ApiError('network', '/goals').name).toBe('ApiError')
   })
 })

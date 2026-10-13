@@ -43,6 +43,12 @@ describe('categories: period or date range (A2)', () => {
   ])('falls back to the period when given %s', (_case, dates) => {
     expect(categoriesParams({ period: '90d', ...dates })).toEqual({ period: '90d' })
   })
+
+  it('accepts a range of a single day', () => {
+    expect(
+      categoriesParams({ period: '90d', startDate: '2024-09-16', endDate: '2024-09-16' }),
+    ).toEqual({ startDate: '2024-09-16', endDate: '2024-09-16' })
+  })
 })
 
 describe('trend months', () => {
@@ -60,7 +66,7 @@ describe('trend months', () => {
     expect(trendsParams({ months })).toEqual({ months: expected })
   })
 
-  it.each(['abc', '', 6.5, null])(
+  it.each(['abc', '', '  ', 6.5, null])(
     'uses the default for %j, which is not a whole number',
     (months) => {
       expect(trendsParams({ months })).toEqual({ months: 12 })
