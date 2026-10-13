@@ -1,6 +1,6 @@
-import { keepPreviousData, QueryClient, useQuery } from '@tanstack/react-query'
+import { keepPreviousData, useQuery } from '@tanstack/react-query'
 
-import { getJson, retryDelay, shouldRetry } from './client'
+import { getJson } from './client'
 import { CUSTOMER_ID } from './config'
 import {
   type CategoriesParams,
@@ -40,15 +40,6 @@ export const queryKeys = {
   transactions: (params: TransactionsParams) => [...queryKeys.all, 'transactions', params] as const,
   goals: () => [...queryKeys.all, 'goals'] as const,
   filters: () => [...queryKeys.all, 'filters'] as const,
-}
-
-/** The app's query client: retries only what can succeed on a second try (NFR R4). */
-export function createQueryClient(): QueryClient {
-  return new QueryClient({
-    defaultOptions: {
-      queries: { retry: shouldRetry, retryDelay, staleTime: 60_000 },
-    },
-  })
 }
 
 /** Fetched once a session: amounts everywhere need its currency (A3). */

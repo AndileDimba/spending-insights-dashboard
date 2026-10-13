@@ -9,7 +9,6 @@ import { server } from '@/mocks/node'
 
 import { ApiError, retryDelay, shouldRetry } from './client'
 import {
-  createQueryClient,
   queryKeys,
   useCategoryBreakdown,
   useFilters,
@@ -19,6 +18,7 @@ import {
   useTransactions,
   useTrends,
 } from './queries'
+import { createQueryClient } from './query-client'
 
 // Scenarios of #12, run against the mock API from #11.
 
