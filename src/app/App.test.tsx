@@ -40,19 +40,32 @@ describe('skip link', () => {
   })
 })
 
+// #25: the shell renders before a page's code has loaded.
+describe('first load', () => {
+  it('shows the header and navigation at once, with the page loading', async () => {
+    renderRoutes(routes)
+
+    expect(screen.getByRole('navigation', { name: 'Main' })).toBeInTheDocument()
+    expect(screen.getByText('Loading the page')).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { level: 1, name: 'Overview' })).toBeInTheDocument()
+    expect(screen.queryByText('Loading the page')).not.toBeInTheDocument()
+  })
+})
+
 describe.each([
   ['/', 'Overview'],
   ['/transactions', 'Transactions'],
   ['/no-such-page', 'Page not found'],
 ])('the page at %s', (route, heading) => {
-  it('has header, navigation and main landmarks and exactly one h1', () => {
+  it('has header, navigation and main landmarks and exactly one h1', async () => {
     renderRoutes(routes, { route })
 
+    // The shell is there at once; each page's code loads on its own (#25).
     expect(screen.getByRole('banner')).toBeInTheDocument()
     expect(screen.getByRole('navigation', { name: 'Main' })).toBeInTheDocument()
     expect(screen.getByRole('main')).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { level: 1, name: heading })).toBeInTheDocument()
     expect(screen.getAllByRole('heading', { level: 1 })).toHaveLength(1)
-    expect(screen.getByRole('heading', { level: 1, name: heading })).toBeInTheDocument()
   })
 
   it('has no detectable accessibility violations', async () => {
@@ -63,9 +76,10 @@ describe.each([
 })
 
 describe('navigation between pages', () => {
-  it('sets the document title on the first page without moving focus', () => {
+  it('sets the document title on the first page without moving focus', async () => {
     renderRoutes(routes)
 
+    await screen.findByRole('heading', { level: 1, name: 'Overview' })
     expect(document.title).toBe('Overview | Spending Insights')
     expect(document.body).toHaveFocus()
   })
