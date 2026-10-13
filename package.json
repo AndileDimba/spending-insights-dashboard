@@ -12,6 +12,7 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b tsconfig.app.json tsconfig.node.json && vite build",
+    "check:bundle": "vite build --manifest --outDir build/budget --emptyOutDir && node scripts/check-bundle-budget.mjs build/budget",
     "preview": "vite preview",
     "typecheck": "tsc -b",
     "lint": "eslint . --max-warnings 0",
