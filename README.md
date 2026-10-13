@@ -63,6 +63,7 @@ To check a running container (headers, caching, deep links, health), run `sh scr
 | Tests in watch mode (for TDD) | `npm run test:watch` |
 | Tests with coverage report (`coverage/index.html`) | `npm run test:coverage` |
 | End-to-end tests (desktop Chromium, Chromium at 360px, WebKit as an iPhone). Install the browsers once with `npx playwright install chromium webkit`. Set `E2E_BASE_URL` to test a running container instead of a local build | `npm run test:e2e` |
+| Mutation tests on `src/shared`, with the Vitest 4 step in [`docs/testing-strategy.md`](docs/testing-strategy.md#mutation-testing) | `npm run test:mutation` |
 | Production build | `npm run build` |
 | Preview the production build | `npm run preview` |
 
