@@ -15,7 +15,8 @@ interface TrendsChartProps {
 
 /**
  * Spending per month as bars. Loaded lazily (ADR 0011). The chart is one image
- * with a text summary; the table under "Show as table" carries every value.
+ * with a text summary; the table under "Show the figures for each month"
+ * carries every value.
  */
 export default function TrendsChart({ trends, currency, summary }: TrendsChartProps) {
   const data = trends.map((trend) => ({

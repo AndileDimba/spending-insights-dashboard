@@ -1,4 +1,4 @@
-import { lazy, Suspense } from 'react'
+import { lazy, Suspense, useState } from 'react'
 import { useSearchParams } from 'react-router'
 
 import { trendsParams } from '@/shared/api/params'
@@ -95,6 +95,7 @@ interface DetailsProps {
 }
 
 function Details({ trends: { trends }, requested, currency }: DetailsProps) {
+  const [figuresOpen, setFiguresOpen] = useState(false)
   const first = trends[0]
   const last = trends.at(-1)
   if (!first || !last) return <p className={styles.empty}>No spending history yet</p>
@@ -104,7 +105,7 @@ function Details({ trends: { trends }, requested, currency }: DetailsProps) {
   const monthName = (month: string) =>
     month === currentMonth ? `${formatMonth(month)} (so far)` : formatMonth(month)
   const highest = trends.reduce((top, trend) => (trend.totalSpent > top.totalSpent ? trend : top))
-  const summary = `Chart of monthly spending from ${formatMonth(first.month)} to ${formatMonth(last.month)}. The highest month is ${formatMonth(highest.month)} at ${formatMoney(highest.totalSpent, currency)}. Show as table lists every month.`
+  const summary = `Chart of monthly spending from ${formatMonth(first.month)} to ${formatMonth(last.month)}. The highest month is ${formatMonth(highest.month)} at ${formatMoney(highest.totalSpent, currency)}. The figures for each month are in a table below the chart.`
 
   return (
     <div className={styles.card}>
@@ -124,8 +125,15 @@ function Details({ trends: { trends }, requested, currency }: DetailsProps) {
         <p className={styles.partial}>{formatMonth(last.month)} is the month so far.</p>
       )}
 
-      <details className={styles.details}>
-        <summary>Show as table</summary>
+      {/* The table opens below the chart rather than replacing it, so the
+          label says what it adds, then how to hide it again (#108). */}
+      <details
+        className={styles.details}
+        onToggle={(event) => {
+          setFiguresOpen(event.currentTarget.open)
+        }}
+      >
+        <summary>{figuresOpen ? 'Hide the figures' : 'Show the figures for each month'}</summary>
         {/* On a phone the table is wider than its card and scrolls sideways
             here. Focusable and named, so keyboard users can reach it and
             scroll it with the arrow keys (WCAG 2.1.1). */}
