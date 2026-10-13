@@ -1,15 +1,59 @@
 import { fileURLToPath, URL } from 'node:url'
 
 import react from '@vitejs/plugin-react'
+import type { Plugin } from 'vite'
 import { defineConfig } from 'vitest/config'
 
 const strictCoverage = { statements: 95, branches: 95, functions: 95, lines: 95 }
 
+/**
+ * Lets the browser fetch the first page's code alongside the app shell,
+ * instead of discovering it only after the shell has run (#25, NFR P1).
+ * Vite preloads static imports only; the pages and the demo's mock API are
+ * dynamic imports, so their chunks are added here as modulepreload links.
+ */
+function preloadFirstPage(modules: readonly string[]): Plugin {
+  return {
+    name: 'preload-first-page',
+    apply: 'build',
+    transformIndexHtml: {
+      order: 'post',
+      handler(html, { bundle }) {
+        if (!bundle) return []
+        const chunks = Object.values(bundle).filter((output) => output.type === 'chunk')
+        const byFile = new Map(chunks.map((chunk) => [chunk.fileName, chunk]))
+        const files = new Set<string>()
+        const add = (fileName: string) => {
+          const chunk = byFile.get(fileName)
+          if (!chunk || files.has(fileName)) return
+          files.add(fileName)
+          chunk.imports.forEach(add)
+        }
+        for (const chunk of chunks) {
+          if (modules.some((module) => chunk.facadeModuleId?.endsWith(module))) add(chunk.fileName)
+        }
+        // Vite has already linked the shell's own imports.
+        return [...files]
+          .filter((file) => !html.includes(file))
+          .map((file) => ({
+            tag: 'link',
+            attrs: { rel: 'modulepreload', crossorigin: true, href: `/${file}` },
+            injectTo: 'head' as const,
+          }))
+      },
+    },
+  }
+}
+
 export default defineConfig({
-  plugins: [react()],
+  plugins: [react(), preloadFirstPage(['src/app/pages/OverviewPage.tsx', 'src/mocks/browser.ts'])],
+
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url)),
+      ...(process.env.VITE_ENABLE_MOCKS === 'true' && {
+        tldts: fileURLToPath(new URL('./src/mocks/stubs/tldts.ts', import.meta.url)),
+      }),
     },
   },
   build: {

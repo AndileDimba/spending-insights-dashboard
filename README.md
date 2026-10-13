@@ -28,7 +28,7 @@ There is no real backend: the API in [`docs/brief/api-spec.md`](docs/brief/api-s
 | `VITE_ENABLE_MOCKS=true npm run build` | On |
 | Docker image | On by default; `--build-arg VITE_ENABLE_MOCKS=false` for a real deployment |
 
-To see the failure states, open any page with `?mock=error`, `?mock=empty` or `?mock=slow`.
+To see the failure states, open any page with `?mock=error`, `?mock=empty` or `?mock=slow`. `?mock=recover` fails every request until the automatic retries are used up, so the error state appears and "Try again" works.
 
 ## Run with Docker
 
@@ -63,6 +63,7 @@ To check a running container (headers, caching, deep links, health), run `sh scr
 | Tests in watch mode (for TDD) | `npm run test:watch` |
 | Tests with coverage report (`coverage/index.html`) | `npm run test:coverage` |
 | End-to-end tests (desktop Chromium, Chromium at 360px, WebKit as an iPhone). Install the browsers once with `npx playwright install chromium webkit`. Set `E2E_BASE_URL` to test a running container instead of a local build | `npm run test:e2e` |
+| Mutation tests on `src/shared`, with the Vitest 4 step in [`docs/testing-strategy.md`](docs/testing-strategy.md#mutation-testing) | `npm run test:mutation` |
 | Production build | `npm run build` |
 | Preview the production build | `npm run preview` |
 
@@ -79,6 +80,7 @@ End-to-end commands are added by the issue that introduces them (see the [roadma
 | [`docs/discovery/threat-model.md`](docs/discovery/threat-model.md) | STRIDE threat model, security headers and residual risks |
 | [`docs/discovery/wireframes.md`](docs/discovery/wireframes.md) | Information architecture and responsive layouts |
 | [`docs/testing-strategy.md`](docs/testing-strategy.md) | Test-driven development, test layers, security tests and quality gates |
+| [`docs/performance/`](docs/performance/README.md) | Bundle budgets and Lighthouse results for the production and demo images, with the reports |
 | [`docs/adr/`](docs/adr/README.md) | Architecture decision records, with an index |
 | [`docs/roadmap.md`](docs/roadmap.md) | Delivery plan |
 | [`CONTRIBUTING.md`](CONTRIBUTING.md) | Branching, commits and pull requests |

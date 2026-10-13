@@ -34,3 +34,7 @@ Thumbs.db
 
 # Local environment overrides
 *.local
+
+# Mutation testing
+.stryker-tmp/
+reports/

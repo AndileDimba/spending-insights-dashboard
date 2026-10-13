@@ -58,11 +58,29 @@ For a bug: write the failing test that reproduces it, then fix it. The test stay
 | Lint, typecheck | pre-commit (staged files), CI | Zero errors, zero warnings |
 | Unit, contract, component tests | CI on every PR | All pass |
 | Coverage (statements, branches, functions, lines) | CI | 80% overall, 95% for `src/shared/lib` and `src/shared/api` |
-| Mutation score | CI (scheduled and on release branches) | 75% on `src/shared/lib` and `src/shared/api` |
+| Mutation score | CI (scheduled and on release branches) | 90% on `src/shared/lib` and `src/shared/api` |
 | Accessibility | Component tests and e2e | Zero axe violations |
 | E2E | CI against the built Docker image | All pass (from milestone 4) |
 
 Thresholds are set slightly below the current level when they are introduced and raised as the code matures. They are never lowered to make a PR pass.
+
+## Mutation testing
+
+Stryker makes small changes to the code in `src/shared/lib` and `src/shared/api` (a `>=` becomes `>`, a message becomes empty) and runs the tests against each one. A change no test notices is a **surviving mutant**: a fault the suite would let through. Configuration is in `stryker.config.mjs`; the workflow `mutation.yml` runs it on release branches, weekly on `develop` and on demand, and uploads the HTML report.
+
+Every surviving mutant is either killed with a new test or marked as **equivalent**, meaning no test could tell it apart because the behaviour is the same. Equivalent mutants are marked where they occur, with the reason:
+
+```ts
+// Equivalent mutants: the listener is removed in `finally` either way.
+// Stryker disable next-line ObjectLiteral,BooleanLiteral
+```
+
+Two settings work around tool limits, and are removed when the tools allow:
+
+- **Vitest 4 for this job only.** Stryker 10's Vitest runner cannot select tests by name on Vitest 5, so every mutant survives ([stryker-js#6210](https://github.com/stryker-mutator/stryker-js/issues/6210)). The workflow installs Vitest 4.1.11 without saving it; the whole suite passes on it. To run locally: `npm install --no-save vitest@4.1.11 @vitest/coverage-v8@4.1.11`, then `npm run test:mutation`; `npm ci` restores Vitest 5.
+- **Static mutants are ignored.** They change module-level constants, such as an `Intl` formatter's options, and the runner does not reload modules per mutant, so they would be reported as surviving whatever the tests do.
+
+The first full run found real gaps, all now tested: no test checked the exact error messages, the `Accept` header, cleanup of the timeout and cancel listener, retrying on exactly 500, or that every query hook passes its abort signal. It also showed that values built in an `it.each` table run before the test does, so they are not covered by it; build them inside the test.
 
 ## What we do not test, and why
 

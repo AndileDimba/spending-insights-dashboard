@@ -96,15 +96,28 @@ describe('MonthlyTrends', () => {
 
     // en-ZA amounts use non-breaking spaces, so compare with spaces normalised.
     expect(chart.getAttribute('aria-label')?.replace(/\s/g, ' ')).toBe(
-      'Chart of monthly spending from January 2024 to June 2024. The highest month is June 2024 at R 4 250,75. Show as table lists every month.',
+      'Chart of monthly spending from January 2024 to June 2024. The highest month is June 2024 at R 4 250,75. The figures for each month are in a table below the chart.',
     )
+  })
+
+  // #108: the table opens below the chart; it does not replace it.
+  it('opens the figures below the chart, and says how to hide them', async () => {
+    respondWith(trends())
+    const { user } = renderWithProviders(<MonthlyTrends />)
+
+    await user.click(await screen.findByText('Show the figures for each month'))
+
+    expect(screen.getByRole('table', { name: 'Monthly spending' })).toBeVisible()
+    expect(screen.getByRole('img')).toBeInTheDocument()
+    expect(screen.getByText('Hide the figures')).toBeInTheDocument()
+    expect(screen.queryByText('Show the figures for each month')).not.toBeInTheDocument()
   })
 
   it('lists each month with total spent, transactions and average in a table', async () => {
     respondWith(trends())
     const { user } = renderWithProviders(<MonthlyTrends />)
 
-    await user.click(await screen.findByText('Show as table'))
+    await user.click(await screen.findByText('Show the figures for each month'))
 
     const table = screen.getByRole('table', { name: 'Monthly spending' })
     const rows = within(table).getAllByRole('row')
@@ -122,7 +135,7 @@ describe('MonthlyTrends', () => {
 
     // Its low bar is a month in progress, not a drop in spending.
     expect(await screen.findByText('June 2024 is the month so far.')).toBeInTheDocument()
-    await user.click(screen.getByText('Show as table'))
+    await user.click(screen.getByText('Show the figures for each month'))
 
     expect(screen.getByRole('rowheader', { name: 'June 2024 (so far)' })).toBeInTheDocument()
   })
@@ -193,11 +206,23 @@ describe('MonthlyTrends', () => {
     expect(await screen.findByRole('img')).toBeInTheDocument()
   })
 
+  it('lets keyboard users reach the table when it scrolls sideways (WCAG 2.1.1)', async () => {
+    respondWith(trends())
+    const { user } = renderWithProviders(<MonthlyTrends />)
+
+    await user.click(await screen.findByText('Show the figures for each month'))
+
+    expect(screen.getByRole('region', { name: 'Monthly spending table' })).toHaveAttribute(
+      'tabindex',
+      '0',
+    )
+  })
+
   it('has no detectable accessibility violations, with the table open', async () => {
     respondWith(trends())
     const { container, user } = renderWithProviders(<MonthlyTrends />)
 
-    await user.click(await screen.findByText('Show as table'))
+    await user.click(await screen.findByText('Show the figures for each month'))
 
     await expectNoAccessibilityViolations(container)
   })

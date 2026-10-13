@@ -8,3 +8,6 @@ package-lock.json
 # Markdown is written by hand. Prettier pads every table column to the
 # widest cell, which turns one-word edits into whole-table diffs.
 *.md
+
+# Generated Lighthouse reports, kept as produced.
+docs/performance/*.html

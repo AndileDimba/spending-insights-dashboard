@@ -1,4 +1,42 @@
-import { expect, scrollsSideways, test } from './fixtures'
+import { expect, expectNoAccessibilityViolations, scrollsSideways, test } from './fixtures'
+
+// #23, journey "filter, sort, paginate, reload and share a deep link". The
+// URL is the state (ADR 0007), so a reload or a shared link shows the same.
+test('filters, sorting and paging live in a URL that can be reloaded and shared', async ({
+  page,
+  context,
+}) => {
+  const transactions = page.getByRole('region', { name: 'Transactions' })
+  const category = page.getByRole('combobox', { name: 'Category' })
+  const sortBy = page.getByRole('combobox', { name: 'Sort by' })
+  const pages = page.getByRole('navigation', { name: 'Pages' })
+  await page.goto('/transactions')
+  await expect(transactions).toHaveAttribute('aria-busy', 'false')
+
+  // Each change resets to the first page, so wait for it to land and the
+  // results to settle before the next step, as a person would.
+  await category.selectOption('Groceries')
+  await expect(page).toHaveURL(/category=Groceries/)
+  await sortBy.selectOption({ label: 'Amount, highest first' })
+  await expect(page).toHaveURL(/sortBy=amount_desc/)
+  await expect(transactions).toHaveAttribute('aria-busy', 'false')
+  await page.getByRole('button', { name: 'Next page' }).click()
+
+  await expect(page).toHaveURL(/page=2/)
+  await expect(pages).toContainText(/Page 2 of \d+/)
+  await expectNoAccessibilityViolations(page)
+
+  await page.reload()
+  await expect(category).toHaveValue('Groceries')
+  await expect(sortBy).toHaveValue('amount_desc')
+  await expect(pages).toContainText(/Page 2 of \d+/)
+
+  // Someone opening the shared link sees the same view.
+  const shared = await context.newPage()
+  await shared.goto(page.url())
+  await expect(shared.getByRole('combobox', { name: 'Category' })).toHaveValue('Groceries')
+  await expect(shared.getByRole('navigation', { name: 'Pages' })).toContainText(/Page 2 of \d+/)
+})
 
 // #74: on an iPhone the date filters were wider than the screen, the page
 // scrolled sideways, and the date fields were shorter than the selects.

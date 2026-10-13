@@ -97,6 +97,10 @@ jobs:
             echo '::error::Mock code found in a build made without VITE_ENABLE_MOCKS'
             exit 1
           fi
+      # NFR P4 and P5: the app shell and the dashboard route stay within
+      # their gzipped JavaScript budgets (#25).
+      - name: Check the JavaScript budgets
+        run: npm run check:bundle
 
   docker:
     name: Docker image

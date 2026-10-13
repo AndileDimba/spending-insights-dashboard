@@ -14,6 +14,10 @@ export function toCents(amount: number): Cents | undefined {
   const cents = Math.round(scaled)
   // Beyond the safe integer range, cents are no longer exact.
   if (!Number.isSafeInteger(cents)) return undefined
+  // Equivalent mutant: > and >= differ only when the error is exactly
+  // TOLERANCE, which no real amount produces; pinning it would test the
+  // choice of constant, not the rule (#24).
+  // Stryker disable next-line EqualityOperator
   if (Math.abs(scaled - cents) > TOLERANCE) return undefined
   return cents as Cents
 }
