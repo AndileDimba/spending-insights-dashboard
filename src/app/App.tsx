@@ -2,7 +2,7 @@ import { QueryClientProvider } from '@tanstack/react-query'
 import { useState } from 'react'
 import { createBrowserRouter, RouterProvider } from 'react-router'
 
-import { createQueryClient } from '@/shared/api/queries'
+import { createQueryClient } from '@/shared/api/query-client'
 
 import { routes } from './routes'
 

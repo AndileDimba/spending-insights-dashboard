@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { render, screen } from '@testing-library/react'
+import { render, screen, waitFor } from '@testing-library/react'
 import { createBrowserRouter, RouterProvider } from 'react-router'
 import { beforeAll, beforeEach, describe, expect, it, onTestFinished } from 'vitest'
 
@@ -21,6 +21,8 @@ const mockApi = () => createHandlers({ seed: 1, now: () => new Date('2024-09-16T
 // here keeps that out of the first test's timeout, as the chart tests do.
 beforeAll(async () => {
   await import('recharts')
+  // Pages load on demand (#25); their first import is slow in the same way.
+  await Promise.all([import('./pages/OverviewPage'), import('./pages/TransactionsPage')])
 }, 60_000)
 
 // Pages fetch their data, so every test here runs against the mock API.
@@ -40,19 +42,32 @@ describe('skip link', () => {
   })
 })
 
+// #25: the shell renders before a page's code has loaded.
+describe('first load', () => {
+  it('shows the header and navigation at once, with the page loading', async () => {
+    renderRoutes(routes)
+
+    expect(screen.getByRole('navigation', { name: 'Main' })).toBeInTheDocument()
+    expect(screen.getByText('Loading the page')).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { level: 1, name: 'Overview' })).toBeInTheDocument()
+    expect(screen.queryByText('Loading the page')).not.toBeInTheDocument()
+  })
+})
+
 describe.each([
   ['/', 'Overview'],
   ['/transactions', 'Transactions'],
   ['/no-such-page', 'Page not found'],
 ])('the page at %s', (route, heading) => {
-  it('has header, navigation and main landmarks and exactly one h1', () => {
+  it('has header, navigation and main landmarks and exactly one h1', async () => {
     renderRoutes(routes, { route })
 
+    // The shell is there at once; each page's code loads on its own (#25).
     expect(screen.getByRole('banner')).toBeInTheDocument()
     expect(screen.getByRole('navigation', { name: 'Main' })).toBeInTheDocument()
     expect(screen.getByRole('main')).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { level: 1, name: heading })).toBeInTheDocument()
     expect(screen.getAllByRole('heading', { level: 1 })).toHaveLength(1)
-    expect(screen.getByRole('heading', { level: 1, name: heading })).toBeInTheDocument()
   })
 
   it('has no detectable accessibility violations', async () => {
@@ -63,9 +78,10 @@ describe.each([
 })
 
 describe('navigation between pages', () => {
-  it('sets the document title on the first page without moving focus', () => {
+  it('sets the document title on the first page without moving focus', async () => {
     renderRoutes(routes)
 
+    await screen.findByRole('heading', { level: 1, name: 'Overview' })
     expect(document.title).toBe('Overview | Spending Insights')
     expect(document.body).toHaveFocus()
   })
@@ -75,7 +91,12 @@ describe('navigation between pages', () => {
 
     await user.click(screen.getByRole('link', { name: 'Transactions' }))
 
-    expect(await screen.findByRole('heading', { level: 1, name: 'Transactions' })).toHaveFocus()
+    // The page loads on demand (#25), so the heading can appear a moment
+    // before the layout's effect moves focus to it.
+    const heading = await screen.findByRole('heading', { level: 1, name: 'Transactions' })
+    await waitFor(() => {
+      expect(heading).toHaveFocus()
+    })
     expect(document.title).toBe('Transactions | Spending Insights')
   })
 

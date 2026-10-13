@@ -13,12 +13,15 @@ test('filters, sorting and paging live in a URL that can be reloaded and shared'
   await page.goto('/transactions')
   await expect(transactions).toHaveAttribute('aria-busy', 'false')
 
+  // Each change resets to the first page, so wait for it to land and the
+  // results to settle before the next step, as a person would.
   await category.selectOption('Groceries')
+  await expect(page).toHaveURL(/category=Groceries/)
   await sortBy.selectOption({ label: 'Amount, highest first' })
+  await expect(page).toHaveURL(/sortBy=amount_desc/)
+  await expect(transactions).toHaveAttribute('aria-busy', 'false')
   await page.getByRole('button', { name: 'Next page' }).click()
 
-  await expect(page).toHaveURL(/category=Groceries/)
-  await expect(page).toHaveURL(/sortBy=amount_desc/)
   await expect(page).toHaveURL(/page=2/)
   await expect(pages).toContainText(/Page 2 of \d+/)
   await expectNoAccessibilityViolations(page)

@@ -83,7 +83,7 @@ function boundaryConfigs() {
 }
 
 export default defineConfig([
-  globalIgnores(['dist', 'coverage', 'playwright-report', 'test-results', 'reports']),
+  globalIgnores(['dist', 'build', 'coverage', 'playwright-report', 'test-results', 'reports']),
 
   {
     files: ['**/*.js'],
