@@ -77,7 +77,7 @@ Every surviving mutant is either killed with a new test or marked as **equivalen
 
 Two settings work around tool limits, and are removed when the tools allow:
 
-- **Vitest 4 for this job only.** Stryker 10's Vitest runner cannot select tests by name on Vitest 5, so every mutant survives ([stryker-js#6210](https://github.com/stryker-mutator/stryker-js/issues/6210)). The workflow installs Vitest 4.1.11 without saving it; the whole suite passes on it. To run locally: `npm install --no-save vitest@4.1.11`, then `npm run test:mutation`; `npm ci` restores Vitest 5.
+- **Vitest 4 for this job only.** Stryker 10's Vitest runner cannot select tests by name on Vitest 5, so every mutant survives ([stryker-js#6210](https://github.com/stryker-mutator/stryker-js/issues/6210)). The workflow installs Vitest 4.1.11 without saving it; the whole suite passes on it. To run locally: `npm install --no-save vitest@4.1.11 @vitest/coverage-v8@4.1.11`, then `npm run test:mutation`; `npm ci` restores Vitest 5.
 - **Static mutants are ignored.** They change module-level constants, such as an `Intl` formatter's options, and the runner does not reload modules per mutant, so they would be reported as surviving whatever the tests do.
 
 The first full run found real gaps, all now tested: no test checked the exact error messages, the `Accept` header, cleanup of the timeout and cancel listener, retrying on exactly 500, or that every query hook passes its abort signal. It also showed that values built in an `it.each` table run before the test does, so they are not covered by it; build them inside the test.

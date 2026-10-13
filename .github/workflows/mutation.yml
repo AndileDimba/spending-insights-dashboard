@@ -36,10 +36,11 @@ jobs:
       - run: npm ci --ignore-scripts
       # Stryker 10's Vitest runner cannot run tests by name on Vitest 5, so
       # every mutant would survive (stryker-js#6210). Until a fixed release,
-      # this job alone runs on Vitest 4, which the whole suite passes on.
+      # this job alone runs on Vitest 4, which the whole suite passes on. The
+      # coverage plugin moves with it, or npm rejects the peer mismatch.
       # Remove this step when Dependabot brings a runner with the fix.
       - name: Use Vitest 4 for Stryker
-        run: npm install --no-save --ignore-scripts vitest@4.1.11
+        run: npm install --no-save --ignore-scripts vitest@4.1.11 @vitest/coverage-v8@4.1.11
       # Fails below the break threshold in stryker.config.mjs.
       - run: npm run test:mutation
       - name: Upload report
