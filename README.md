@@ -80,6 +80,7 @@ End-to-end commands are added by the issue that introduces them (see the [roadma
 | [`docs/discovery/threat-model.md`](docs/discovery/threat-model.md) | STRIDE threat model, security headers and residual risks |
 | [`docs/discovery/wireframes.md`](docs/discovery/wireframes.md) | Information architecture and responsive layouts |
 | [`docs/testing-strategy.md`](docs/testing-strategy.md) | Test-driven development, test layers, security tests and quality gates |
+| [`docs/performance/`](docs/performance/README.md) | Bundle budgets and Lighthouse results for the production and demo images, with the reports |
 | [`docs/adr/`](docs/adr/README.md) | Architecture decision records, with an index |
 | [`docs/roadmap.md`](docs/roadmap.md) | Delivery plan |
 | [`CONTRIBUTING.md`](CONTRIBUTING.md) | Branching, commits and pull requests |

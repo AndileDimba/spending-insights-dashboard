@@ -139,6 +139,7 @@ These are added as the project is scaffolded. Keep this table up to date.
 | E2E tests | `npm run test:e2e` |
 | Mutation tests (see `docs/testing-strategy.md`) | `npm run test:mutation` |
 | Production build | `npm run build` |
+| Check the JavaScript budgets | `npm run check:bundle` |
 | Preview production build | `npm run preview` |
 | Docker build | `docker build -t spending-insights .` |
 | Docker run | `docker run --rm -p 8080:8080 spending-insights` |
