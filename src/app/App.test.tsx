@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { render, screen } from '@testing-library/react'
+import { render, screen, waitFor } from '@testing-library/react'
 import { createBrowserRouter, RouterProvider } from 'react-router'
 import { beforeAll, beforeEach, describe, expect, it, onTestFinished } from 'vitest'
 
@@ -21,6 +21,8 @@ const mockApi = () => createHandlers({ seed: 1, now: () => new Date('2024-09-16T
 // here keeps that out of the first test's timeout, as the chart tests do.
 beforeAll(async () => {
   await import('recharts')
+  // Pages load on demand (#25); their first import is slow in the same way.
+  await Promise.all([import('./pages/OverviewPage'), import('./pages/TransactionsPage')])
 }, 60_000)
 
 // Pages fetch their data, so every test here runs against the mock API.
@@ -89,7 +91,12 @@ describe('navigation between pages', () => {
 
     await user.click(screen.getByRole('link', { name: 'Transactions' }))
 
-    expect(await screen.findByRole('heading', { level: 1, name: 'Transactions' })).toHaveFocus()
+    // The page loads on demand (#25), so the heading can appear a moment
+    // before the layout's effect moves focus to it.
+    const heading = await screen.findByRole('heading', { level: 1, name: 'Transactions' })
+    await waitFor(() => {
+      expect(heading).toHaveFocus()
+    })
     expect(document.title).toBe('Transactions | Spending Insights')
   })
 
