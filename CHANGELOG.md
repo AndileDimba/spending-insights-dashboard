@@ -6,6 +6,28 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+## [0.4.0] - 2026-10-13
+
+Milestone 4 (Hardening), most of it: end-to-end journeys, mutation testing and the performance budgets, with fixes from testers.
+
+### Added
+
+- End-to-end journeys in desktop Chromium, Chromium at 360px and WebKit as an iPhone: changing the period, drilling down to transactions, filters and paging in a shareable URL, the keyboard alone, an error with a retry, the not found page, security headers, and an axe scan on every page (#23).
+- A `?mock=recover` scenario: every request fails until the automatic retries are used up, so the error state appears and "Try again" works (#23).
+- Mutation testing with Stryker on `src/shared`, weekly and on release branches, with a 90% threshold. The first run found untested error messages, request cleanup and abort signals, now covered by 21 new tests (#24).
+- A check of the JavaScript budgets on every pull request, and a performance report with Lighthouse results for the production and demo images (#25).
+
+### Changed
+
+- Each page's code loads on its own, and the first page's code is preloaded. The app shell is 106.5 KB gzipped, down from 139.0 KB, and the header appears before the page has loaded (#25).
+- The demo's mock API is 34.9 KB instead of 143.5 KB, without the public suffix list its unused cookie support pulled in (#25).
+- Playwright 1.64.0 and Vite 8.3.4. The CSP is unchanged; a WebKit bug that reports every `<select>` as a violation is ignored in WebKit tests only, with a canary for when it is fixed (#103).
+
+### Fixed
+
+- With the monthly figures open on a phone, the page no longer grows wider than the screen, and the figures can be scrolled from the keyboard (#99).
+- The monthly figures control says it shows the figures below the chart, then how to hide them, instead of "Show as table" (#108).
+
 ## [0.3.3] - 2026-10-12
 
 ### Fixed
@@ -95,7 +117,8 @@ The first release, covering milestone 0 (Foundations) and milestone 1 (Data laye
 - A mock API on MSW 3: about 18 months of seeded South African transactions, every endpoint derived from one data set so the numbers agree, strict parameter validation with Problem Details, and error, empty and slow scenarios.
 - The mock API runs in the development server and in the demo Docker image (`VITE_ENABLE_MOCKS`). A real build contains no mock code, and CI checks that.
 
-[Unreleased]: https://github.com/AndileDimba/spending-insights-dashboard/compare/v0.3.3...develop
+[Unreleased]: https://github.com/AndileDimba/spending-insights-dashboard/compare/v0.4.0...develop
+[0.4.0]: https://github.com/AndileDimba/spending-insights-dashboard/compare/v0.3.3...v0.4.0
 [0.3.3]: https://github.com/AndileDimba/spending-insights-dashboard/compare/v0.3.2...v0.3.3
 [0.3.2]: https://github.com/AndileDimba/spending-insights-dashboard/compare/v0.3.1...v0.3.2
 [0.3.1]: https://github.com/AndileDimba/spending-insights-dashboard/compare/v0.3.0...v0.3.1
