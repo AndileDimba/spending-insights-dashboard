@@ -32,7 +32,7 @@ test('the monthly spending table scrolls inside its card, not the page', async (
     'false',
   )
 
-  await page.getByText('Show as table').click()
+  await page.getByText('Show the figures for each month').click()
 
   await expect(page.getByRole('table', { name: 'Monthly spending' })).toBeVisible()
   expect(await scrollsSideways(page)).toBe(false)
