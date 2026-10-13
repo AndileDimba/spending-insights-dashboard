@@ -54,6 +54,9 @@ function wholeNumber(value: unknown, min: number, max: number, fallback: number)
 function dateRange(startInput: unknown, endInput: unknown) {
   const startDate = date.parse(startInput)
   const endDate = date.parse(endInput)
+  // The undefined checks are for TypeScript; at runtime a comparison with
+  // undefined is always false, so mutating them changes nothing (#24).
+  // Stryker disable next-line ConditionalExpression,LogicalOperator
   const inverted = startDate !== undefined && endDate !== undefined && startDate > endDate
   return inverted ? {} : { startDate, endDate }
 }

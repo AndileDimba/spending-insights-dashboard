@@ -20,6 +20,9 @@ function messageFor(kind: ApiErrorKind, status: number | undefined): string {
     case 'validation':
       return 'We received information that could not be shown. Please try again later.'
     case 'http':
+      // Equivalent mutant: the undefined check is for TypeScript; undefined >= 500
+      // is false at runtime anyway (#24).
+      // Stryker disable next-line ConditionalExpression
       if (status !== undefined && status >= 500) {
         return 'This service is temporarily unavailable. Please try again.'
       }
@@ -87,6 +90,8 @@ export async function getJson<S extends ZodType, P extends QueryParams<P> = Reco
     controller.abort()
   }
   if (signal?.aborted) cancel()
+  // Equivalent mutants: the listener is removed in `finally` either way.
+  // Stryker disable next-line ObjectLiteral,BooleanLiteral
   signal?.addEventListener('abort', cancel, { once: true })
 
   /** A rejection caused by the caller cancelling is passed on as it is, not reported. */
