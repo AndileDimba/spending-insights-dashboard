@@ -2,6 +2,8 @@
 
 Work is planned as GitHub issues and delivered one branch and one PR at a time. This list is the backlog in delivery order. Each line is an issue with refined acceptance criteria, grouped into a [milestone](https://github.com/AndileDimba/spending-insights-dashboard/milestones) that ends in a tagged release. The issue number goes in the branch name.
 
+The release numbers below are the plan. As shipped, milestones 0 and 1 were released together as 0.2.0, milestones 2 and 3 as 0.3.0, and milestone 4 as 0.4.0 and 1.0.0, with fixes from testers in 0.3.1 to 0.3.3. The [changelog](../CHANGELOG.md) has each release.
+
 ## Milestone 0: Foundations (release 0.1.0)
 
 | Issue | Branch | Work |

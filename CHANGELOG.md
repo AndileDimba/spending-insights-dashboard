@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+### Changed
+
+- The README covers the project end to end: the live demo with screenshots, running with Docker or npm, how to run each test layer, an architecture diagram with the decisions behind it, security, trade-offs, known limitations and next steps. It was checked by following it in a fresh clone (#26).
+
 ## [0.4.0] - 2026-10-13
 
 Milestone 4 (Hardening), most of it: end-to-end journeys, mutation testing and the performance budgets, with fixes from testers.
