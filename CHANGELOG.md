@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+## [1.0.0] - 2026-10-14
+
+The first production release, completing milestone 4 (Hardening). Testers confirmed the iPhone fixes from 0.3.2 to 0.4.0 (#74, #95, #99, #108) on real devices.
+
 ### Changed
 
 - The README covers the project end to end: the live demo with screenshots, running with Docker or npm, how to run each test layer, an architecture diagram with the decisions behind it, security, trade-offs, known limitations and next steps. It was checked by following it in a fresh clone (#26).
@@ -121,7 +125,8 @@ The first release, covering milestone 0 (Foundations) and milestone 1 (Data laye
 - A mock API on MSW 3: about 18 months of seeded South African transactions, every endpoint derived from one data set so the numbers agree, strict parameter validation with Problem Details, and error, empty and slow scenarios.
 - The mock API runs in the development server and in the demo Docker image (`VITE_ENABLE_MOCKS`). A real build contains no mock code, and CI checks that.
 
-[Unreleased]: https://github.com/AndileDimba/spending-insights-dashboard/compare/v0.4.0...develop
+[Unreleased]: https://github.com/AndileDimba/spending-insights-dashboard/compare/v1.0.0...develop
+[1.0.0]: https://github.com/AndileDimba/spending-insights-dashboard/compare/v0.4.0...v1.0.0
 [0.4.0]: https://github.com/AndileDimba/spending-insights-dashboard/compare/v0.3.3...v0.4.0
 [0.3.3]: https://github.com/AndileDimba/spending-insights-dashboard/compare/v0.3.2...v0.3.3
 [0.3.2]: https://github.com/AndileDimba/spending-insights-dashboard/compare/v0.3.1...v0.3.2
