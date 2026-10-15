@@ -107,7 +107,11 @@ describe('navigation between pages', () => {
     renderRoutes(routes)
 
     await screen.findByRole('heading', { level: 1, name: 'Overview' })
-    expect(document.title).toBe('Overview | Spending Insights')
+    // The page sets the title in an effect, which can run after the heading
+    // appears; until then the previous test's title is still there (#124).
+    await waitFor(() => {
+      expect(document.title).toBe('Overview | Spending Insights')
+    })
     expect(document.body).toHaveFocus()
   })
 
