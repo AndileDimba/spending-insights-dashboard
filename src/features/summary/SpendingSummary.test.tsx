@@ -135,6 +135,14 @@ describe('SpendingSummary', () => {
     expect(await screen.findByRole('group', { name: 'Refunds' })).toHaveTextContent('1 refund')
   })
 
+  it('says when there were no refunds', async () => {
+    respondWith({ ...summary(), refunds: { totalAmount: 0, transactionCount: 0 } })
+
+    renderWithProviders(<SpendingSummary />)
+
+    expect(await screen.findByRole('group', { name: 'Refunds' })).toHaveTextContent('No refunds')
+  })
+
   it('leaves the refunds out when the API does not send them (A21)', async () => {
     respondWith(summary())
 

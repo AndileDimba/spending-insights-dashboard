@@ -26,11 +26,18 @@
   font-size: var(--font-size-sm);
 }
 
-/* Two cards a row on a phone, four on a wide screen. */
+/* Two cards a row on a phone, all five on a wide screen. */
 .cards {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 9.5rem), 1fr));
   gap: var(--space-3);
+}
+
+/* With two a row, an odd last card takes the whole row rather than half of it. */
+@media (max-width: 40rem) {
+  .card:last-child:nth-child(odd) {
+    grid-column: 1 / -1;
+  }
 }
 
 .card {

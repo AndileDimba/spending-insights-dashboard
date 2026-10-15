@@ -129,7 +129,7 @@ function Cards({ summary, currency }: { summary: Summary; currency: Profile['cur
         <Card
           label="Refunds"
           value={formatMoney(refunds.totalAmount, currency)}
-          note={`${formatCount(refunds.transactionCount)} ${refunds.transactionCount === 1 ? 'refund' : 'refunds'}`}
+          note={refundCount(refunds.transactionCount)}
         />
       )}
       <Card
@@ -141,6 +141,11 @@ function Cards({ summary, currency }: { summary: Summary; currency: Profile['cur
       <Card label="Top category" value={summary.topCategory ?? 'None'} />
     </div>
   )
+}
+
+function refundCount(count: number): string {
+  if (count === 0) return 'No refunds'
+  return `${formatCount(count)} ${count === 1 ? 'refund' : 'refunds'}`
 }
 
 interface CardProps {
