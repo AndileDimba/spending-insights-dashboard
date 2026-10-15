@@ -113,7 +113,7 @@ describe('MonthlyTrends', () => {
     expect(screen.queryByText('Show the figures for each month')).not.toBeInTheDocument()
   })
 
-  it('lists each month with total spent, transactions and average in a table', async () => {
+  it('lists each month with total spent, purchases and average purchase in a table (A21)', async () => {
     respondWith(trends())
     const { user } = renderWithProviders(<MonthlyTrends />)
 
@@ -123,6 +123,10 @@ describe('MonthlyTrends', () => {
     const rows = within(table).getAllByRole('row')
     expect(rows).toHaveLength(7) // a header row and six months
     expect(within(table).getByRole('columnheader', { name: 'Total spent' })).toBeInTheDocument()
+    expect(within(table).getByRole('columnheader', { name: 'Purchases' })).toBeInTheDocument()
+    expect(
+      within(table).getByRole('columnheader', { name: 'Average purchase' }),
+    ).toBeInTheDocument()
     expect(rows[1]).toHaveTextContent('January 2024')
     expect(rows[1]).toHaveTextContent('R 3 890,25')
     expect(rows[1]).toHaveTextContent('42')

@@ -119,7 +119,7 @@ function Details({ breakdown, currency }: { breakdown: Breakdown; currency: stri
               </Link>
               <span className={styles.count}>
                 {formatCount(category.transactionCount)}{' '}
-                {category.transactionCount === 1 ? 'transaction' : 'transactions'}
+                {category.transactionCount === 1 ? 'purchase' : 'purchases'}
               </span>
             </span>
             <span className={styles.figures}>

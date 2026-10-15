@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+### Fixed
+
+- Purchases and refunds are reported separately, so the figures always reconcile. A category whose refunds outweighed its purchases used to vanish, and the categories then added up to more than the summary. Spending now counts purchases everywhere, and the summary shows refunds as their own figure (A21) (#115).
+
 ## [1.0.0] - 2026-10-14
 
 The first production release, completing milestone 4 (Hardening). Testers confirmed the iPhone fixes from 0.3.2 to 0.4.0 (#74, #95, #99, #108) on real devices.

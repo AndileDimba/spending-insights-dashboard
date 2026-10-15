@@ -1,6 +1,8 @@
 import { beforeAll, describe, expect, it } from 'vitest'
 
-import { CATEGORIES } from './catalogue'
+import type { Cents } from '@/shared/lib/money'
+
+import { CATEGORIES, type CategoryName } from './catalogue'
 import { sastDate } from './dates'
 import { generateDataset, type MockDataset, type MockTransaction } from './generate'
 import {
@@ -32,6 +34,27 @@ function sum(transactions: readonly MockTransaction[]): number {
   return transactions.reduce((total, transaction) => total + transaction.amount, 0)
 }
 
+// A21: spending is purchases; refunds are reported on their own.
+function purchases(transactions: readonly MockTransaction[]): MockTransaction[] {
+  return transactions.filter((transaction) => transaction.amount > 0)
+}
+
+function refunds(transactions: readonly MockTransaction[]): MockTransaction[] {
+  return transactions.filter((transaction) => transaction.amount < 0)
+}
+
+function transaction(category: CategoryName, amount: number, date: string): MockTransaction {
+  return {
+    id: `${category}-${String(amount)}`,
+    date,
+    merchant: category,
+    category,
+    amount: amount as Cents,
+    description: '',
+    paymentMethod: 'Debit Card',
+  }
+}
+
 describe('periodRange (A10)', () => {
   it.each([
     ['7d', '2024-09-10'],
@@ -52,12 +75,17 @@ describe('summarise', () => {
     summary = summarise(dataset, '30d')
   })
 
-  it('totals the transactions in the period, net of refunds (A7)', () => {
-    expect(summary.totalSpent).toBe(sum(within(range)))
-    expect(summary.transactionCount).toBe(within(range).length)
+  it('totals the purchases in the period, and the refunds on their own (A21)', () => {
+    expect(refunds(within(range)).length).toBeGreaterThan(0)
+    expect(summary.totalSpent).toBe(sum(purchases(within(range))))
+    expect(summary.transactionCount).toBe(purchases(within(range)).length)
+    expect(summary.refunds).toEqual({
+      totalAmount: -sum(refunds(within(range))),
+      transactionCount: refunds(within(range)).length,
+    })
   })
 
-  it('averages the total over the number of transactions, to the cent', () => {
+  it('averages the total over the number of purchases, to the cent', () => {
     expect(summary.averageTransaction).toBe(
       Math.round(summary.totalSpent / summary.transactionCount),
     )
@@ -66,7 +94,9 @@ describe('summarise', () => {
   it('names the category with the most spending as the top category', () => {
     const byCategory = CATEGORIES.map((category) => ({
       name: category.name,
-      total: sum(within(range).filter((transaction) => transaction.category === category.name)),
+      total: sum(
+        purchases(within(range)).filter((transaction) => transaction.category === category.name),
+      ),
     }))
     const top = byCategory.reduce((best, next) => (next.total > best.total ? next : best))
 
@@ -74,7 +104,7 @@ describe('summarise', () => {
   })
 
   it('compares with the same number of days immediately before', () => {
-    const previous = within({ startDate: '2024-07-19', endDate: '2024-08-17' })
+    const previous = purchases(within({ startDate: '2024-07-19', endDate: '2024-08-17' }))
     const expected = ((summary.totalSpent - sum(previous)) / sum(previous)) * 100
 
     expect(summary.comparedToPrevious.spentChange).toBe(Math.round(expected * 10) / 10)
@@ -95,8 +125,59 @@ describe('summarise', () => {
       transactionCount: 0,
       averageTransaction: 0,
       topCategory: null,
+      refunds: { totalAmount: 0, transactionCount: 0 },
     })
   })
+})
+
+// The review that found this: a refund larger than a category's purchases
+// made that category vanish, so the categories no longer added up (A21).
+describe('purchases and refunds reconcile (A21)', () => {
+  const today = '2024-09-16'
+  const day = '2024-09-15T10:00:00Z'
+  const mixed: MockDataset = {
+    startDate: '2024-09-01',
+    today,
+    transactions: [transaction('Groceries', 10000, day), transaction('Shopping', -5000, day)],
+  }
+
+  it('reports a R100 purchase and a R50 refund in another category as both', () => {
+    expect(summarise(mixed, '7d')).toMatchObject({
+      totalSpent: 10000,
+      transactionCount: 1,
+      refunds: { totalAmount: 5000, transactionCount: 1 },
+    })
+    expect(categoryBreakdown(mixed, periodRange('7d', today))).toMatchObject({
+      totalAmount: 10000,
+      categories: [{ name: 'Groceries', amount: 10000, percentage: 100, transactionCount: 1 }],
+    })
+  })
+
+  it('reports a period with only refunds as no spending, with its refunds', () => {
+    const onlyRefunds = { ...mixed, transactions: [transaction('Shopping', -5000, day)] }
+
+    expect(summarise(onlyRefunds, '7d')).toMatchObject({
+      totalSpent: 0,
+      transactionCount: 0,
+      refunds: { totalAmount: 5000, transactionCount: 1 },
+    })
+    expect(categoryBreakdown(onlyRefunds, periodRange('7d', today)).categories).toEqual([])
+  })
+
+  it.each(['7d', '30d', '90d', '1y'] as const)(
+    'agrees across summary, categories and transactions for %s',
+    (period) => {
+      const summary = summarise(dataset, period)
+      const breakdown = categoryBreakdown(dataset, periodRange(period, dataset.today))
+      const all = within(periodRange(period, dataset.today))
+      const categoryTotal = breakdown.categories.reduce((total, c) => total + c.amount, 0)
+
+      expect(categoryTotal).toBe(summary.totalSpent)
+      expect(breakdown.totalAmount).toBe(summary.totalSpent)
+      expect(summary.totalSpent - summary.refunds.totalAmount).toBe(sum(all))
+      expect(summary.transactionCount + summary.refunds.transactionCount).toBe(all.length)
+    },
+  )
 })
 
 describe('categoryBreakdown', () => {
@@ -128,7 +209,7 @@ describe('categoryBreakdown', () => {
 
     expect(groceries).toMatchObject({ color: '#FF6B6B', icon: 'shopping-cart' })
     expect(groceries?.transactionCount).toBe(
-      within(range).filter((transaction) => transaction.category === 'Groceries').length,
+      purchases(within(range)).filter((transaction) => transaction.category === 'Groceries').length,
     )
   })
 
@@ -158,9 +239,9 @@ describe('monthlyTrends (A4)', () => {
     expect(monthlyTrends(dataset, 24)).toHaveLength(18)
   })
 
-  it('totals each month from its transactions', () => {
+  it('totals each month from its purchases (A21)', () => {
     const august = monthlyTrends(dataset, 2)[0]
-    const augustTransactions = within({ startDate: '2024-08-01', endDate: '2024-08-31' })
+    const augustTransactions = purchases(within({ startDate: '2024-08-01', endDate: '2024-08-31' }))
 
     expect(august).toEqual({
       month: '2024-08',
@@ -177,10 +258,10 @@ describe('spendingGoals (A8)', () => {
     goals = spendingGoals(dataset)
   })
 
-  it('measures this month’s spending against each budget', () => {
+  it('measures this month’s purchases against each budget (A21)', () => {
     for (const goal of goals) {
       const spent = sum(
-        within({ startDate: '2024-09-01', endDate: '2024-09-16' }).filter(
+        purchases(within({ startDate: '2024-09-01', endDate: '2024-09-16' })).filter(
           (transaction) => transaction.category === goal.category,
         ),
       )

@@ -39,7 +39,9 @@ test('a category drills down to its transactions for the same dates', async ({ p
   const top = page.getByRole('list', { name: 'Categories by amount' }).getByRole('listitem').first()
   const link = top.getByRole('link')
   const category = normalise(await link.textContent())
-  const count = normalise(await top.getByText(/transactions?$/).textContent())
+  const purchases = Number(
+    normalise(await top.getByText(/purchases?$/).textContent()).replace(/\D/g, ''),
+  )
 
   await link.click()
 
@@ -47,6 +49,13 @@ test('a category drills down to its transactions for the same dates', async ({ p
   await expect(page.getByRole('heading', { level: 1, name: 'Transactions' })).toBeFocused()
   await expect(page.getByRole('combobox', { name: 'Category' })).toHaveValue(category)
   await settled(page, 'Transactions')
-  // Both views come from the same data, so they must agree.
-  await expect(page.getByRole('status')).toHaveText(count.replace(/ /g, ' '))
+  // Both views come from the same data, so they must agree: the list holds the
+  // category's purchases and its refunds, which the category leaves out (A21).
+  // A hundred to a page puts every one of them on screen.
+  await page.goto(`${page.url()}&pageSize=100`)
+  await settled(page, 'Transactions')
+  const total = Number(normalise(await page.getByRole('status').textContent()).replace(/\D/g, ''))
+  const refunds = await page.getByText('Refund', { exact: true }).count()
+  expect(total).toBeLessThanOrEqual(100)
+  expect(total - refunds).toBe(purchases)
 })

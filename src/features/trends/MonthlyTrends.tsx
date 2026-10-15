@@ -149,8 +149,8 @@ function Details({ trends: { trends }, requested, currency }: DetailsProps) {
               <tr>
                 <th scope="col">Month</th>
                 <th scope="col">Total spent</th>
-                <th scope="col">Transactions</th>
-                <th scope="col">Average transaction</th>
+                <th scope="col">Purchases</th>
+                <th scope="col">Average purchase</th>
               </tr>
             </thead>
             <tbody>
