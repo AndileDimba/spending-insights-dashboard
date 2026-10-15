@@ -41,7 +41,7 @@ export function TransactionFilters({ state }: { state: TransactionFilterState })
         <span>From</span>
         <input
           type="date"
-          value={state.startDate ?? ''}
+          value={state.dateInputs.startDate ?? ''}
           max={today}
           aria-invalid={state.rangeInverted}
           aria-describedby={state.rangeInverted ? rangeErrorId : undefined}
@@ -55,7 +55,7 @@ export function TransactionFilters({ state }: { state: TransactionFilterState })
         <span>To</span>
         <input
           type="date"
-          value={state.endDate ?? ''}
+          value={state.dateInputs.endDate ?? ''}
           max={today}
           aria-invalid={state.rangeInverted}
           aria-describedby={state.rangeInverted ? rangeErrorId : undefined}

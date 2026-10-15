@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 
 import {
   categoriesParams,
+  parseDate,
   summaryParams,
   toSearchParams,
   transactionsParams,
@@ -137,6 +138,19 @@ describe('transactions', () => {
 
     expect(Object.keys(params).sort()).toEqual(['limit', 'offset', 'sortBy'])
   })
+})
+
+describe('parseDate', () => {
+  it('keeps a real calendar date', () => {
+    expect(parseDate('2024-02-29')).toBe('2024-02-29')
+  })
+
+  it.each([['2024-02-30'], ['2024-9-1'], ['<script>'], [''], [undefined], [20240901]])(
+    'drops %s',
+    (value) => {
+      expect(parseDate(value)).toBeUndefined()
+    },
+  )
 })
 
 describe('toSearchParams', () => {

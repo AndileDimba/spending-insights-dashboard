@@ -1,6 +1,6 @@
 import { useSearchParams } from 'react-router'
 
-import { type SortBy, transactionsParams } from '@/shared/api/params'
+import { parseDate, type SortBy, transactionsParams } from '@/shared/api/params'
 import { useFilters } from '@/shared/api/queries'
 
 /** Filter parameters this page owns. Others, such as ?mock=, are left alone. */
@@ -12,7 +12,7 @@ export type PageSize = (typeof PAGE_SIZES)[number]
 export type FilterName = (typeof FILTER_KEYS)[number]
 
 export interface TransactionFilterState {
-  /** Validated values, ready for the controls and the request. */
+  /** Validated values, ready for the request. */
   category: string | undefined
   startDate: string | undefined
   endDate: string | undefined
@@ -26,6 +26,11 @@ export interface TransactionFilterState {
   ready: boolean
   /** Whether any filter or sort order differs from the defaults. */
   active: boolean
+  /**
+   * The dates as entered, for the date fields. They differ from the request's
+   * when the range is inverted: the fields keep both, so one can be corrected (#117).
+   */
+  dateInputs: { startDate: string | undefined; endDate: string | undefined }
   /** The start date is after the end date, so the range is not applied. */
   rangeInverted: boolean
   setFilter: (name: FilterName, value: string) => void
@@ -71,8 +76,8 @@ export function useTransactionFilters(): TransactionFilterState {
       : undefined
   const ready = params.category === undefined || !filters.isPending
 
-  const rawStart = raw('startDate')
-  const rawEnd = raw('endDate')
+  const enteredStart = parseDate(raw('startDate'))
+  const enteredEnd = parseDate(raw('endDate'))
 
   function update(change: (next: URLSearchParams) => void) {
     setSearchParams((current) => {
@@ -92,7 +97,9 @@ export function useTransactionFilters(): TransactionFilterState {
     categories,
     ready,
     active: FILTER_KEYS.some((key) => searchParams.has(key)),
-    rangeInverted: rawStart !== undefined && rawEnd !== undefined && rawStart > rawEnd,
+    dateInputs: { startDate: enteredStart, endDate: enteredEnd },
+    rangeInverted:
+      enteredStart !== undefined && enteredEnd !== undefined && enteredStart > enteredEnd,
     setFilter: (name, value) => {
       update((next) => {
         if (value) next.set(name, value)
