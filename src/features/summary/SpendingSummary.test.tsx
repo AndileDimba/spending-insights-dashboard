@@ -180,7 +180,7 @@ describe('SpendingSummary', () => {
   })
 
   it('names the period it covers', async () => {
-    respondWith(summary())
+    respondWith({ ...summary(), period: '90d' })
 
     renderWithProviders(<SpendingSummary />, { route: '/?period=90d' })
 
@@ -226,14 +226,17 @@ describe('SpendingSummary', () => {
     )
   })
 
-  // #77: swapping the cards for skeletons shrank the page under the reader.
-  it('keeps the current totals on screen while a new period loads', async () => {
+  // #77: swapping the cards for skeletons shrank the page under the reader,
+  // so the current totals stay. #116: they keep their own period's name, and
+  // say they are updating, so old figures never sit under a new period.
+  it('keeps the current totals, with their own period, while a new period loads', async () => {
     let answer: () => void = () => undefined
     const answered = new Promise<void>((resolve) => (answer = resolve))
     server.use(
       http.get(SUMMARY_URL, async ({ request }) => {
         if (new URL(request.url).searchParams.get('period') === '7d') {
           await answered
+          return HttpResponse.json({ ...summary(), period: '7d', totalSpent: 1000 })
         }
         return HttpResponse.json(summary())
       }),
@@ -243,11 +246,22 @@ describe('SpendingSummary', () => {
 
     await act(() => router.navigate('/?period=7d'))
 
+    const region = screen.getByRole('region', { name: /Spending summary/ })
+    expect(region).toHaveAccessibleName('Spending summary, last 30 days')
+    expect(within(region).getByText('Last 30 days')).toBeInTheDocument()
     expect(card('Total spent')).toHaveTextContent('R 4 250,75')
-    const region = screen.getByRole('region', { name: 'Spending summary, last 7 days' })
+    expect(within(region).getByText('Updating')).toBeInTheDocument()
     expect(region).toHaveAttribute('aria-busy', 'true')
+
     answer()
-    await waitFor(() => expect(region).toHaveAttribute('aria-busy', 'false'))
+
+    await waitFor(() => {
+      expect(card('Total spent')).toHaveTextContent('R 1 000,00')
+    })
+    expect(region).toHaveAccessibleName('Spending summary, last 7 days')
+    expect(within(region).getByText('Last 7 days')).toBeInTheDocument()
+    expect(within(region).queryByText('Updating')).not.toBeInTheDocument()
+    expect(region).toHaveAttribute('aria-busy', 'false')
   })
 
   it('requests the summary again when Retry is selected after an error', async () => {

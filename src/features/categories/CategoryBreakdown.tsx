@@ -7,6 +7,7 @@ import type { CategoryBreakdown as Breakdown } from '@/shared/api/schemas'
 import { formatCount, formatMoney, formatPercent, formatShortDate } from '@/shared/lib/format'
 import { ErrorState } from '@/shared/ui/ErrorState'
 import { Skeleton } from '@/shared/ui/Skeleton'
+import { Updating } from '@/shared/ui/Updating'
 import { VisuallyHidden } from '@/shared/ui/VisuallyHidden'
 
 import styles from './CategoryBreakdown.module.css'
@@ -45,6 +46,7 @@ export function CategoryBreakdown() {
             {formatShortDate(breakdown.data.dateRange.endDate)}
           </p>
         )}
+        {breakdown.isPlaceholderData && <Updating />}
       </div>
 
       {failure ? (

@@ -9,6 +9,7 @@ import { formatCount, formatMoney, formatMonth } from '@/shared/lib/format'
 import { ErrorState } from '@/shared/ui/ErrorState'
 import { SegmentedControl } from '@/shared/ui/SegmentedControl'
 import { Skeleton } from '@/shared/ui/Skeleton'
+import { Updating } from '@/shared/ui/Updating'
 import { VisuallyHidden } from '@/shared/ui/VisuallyHidden'
 
 import styles from './MonthlyTrends.module.css'
@@ -54,7 +55,10 @@ export function MonthlyTrends() {
       aria-busy={pending || trends.isPlaceholderData}
     >
       <div className={styles.heading}>
-        <h2 className={styles.title}>Monthly spending</h2>
+        <div className={styles.titleGroup}>
+          <h2 className={styles.title}>Monthly spending</h2>
+          {trends.isPlaceholderData && <Updating />}
+        </div>
         <SegmentedControl label="Range" options={RANGES} value={months} onChange={chooseRange} />
       </div>
 

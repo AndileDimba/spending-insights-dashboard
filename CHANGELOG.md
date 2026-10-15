@@ -13,6 +13,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 ### Fixed
 
 - Purchases and refunds are reported separately, so the figures always reconcile. A category whose refunds outweighed its purchases used to vanish, and the categories then added up to more than the summary. Spending now counts purchases everywhere, and the summary shows refunds as their own figure (A21) (#115).
+- While a new period loads, the summary keeps naming the period its figures are for, instead of the new one, and every view that keeps its figures on screen while it updates says "Updating" (#116).
 - An inverted date range on Transactions keeps both dates, so one can be corrected, and the list waits for the correction instead of widening to every transaction (#117).
 
 ## [1.0.0] - 2026-10-14

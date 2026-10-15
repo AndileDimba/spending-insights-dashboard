@@ -6,6 +6,7 @@ import type { Profile, SpendingSummary as Summary } from '@/shared/api/schemas'
 import { formatCount, formatMoney, formatPercent } from '@/shared/lib/format'
 import { ErrorState } from '@/shared/ui/ErrorState'
 import { Skeleton } from '@/shared/ui/Skeleton'
+import { Updating } from '@/shared/ui/Updating'
 import { VisuallyHidden } from '@/shared/ui/VisuallyHidden'
 
 import styles from './SpendingSummary.module.css'
@@ -47,8 +48,10 @@ export function SpendingSummary() {
   // The summary endpoint takes no date range, so a custom range keeps it on
   // the default period, with a note saying so (A20).
   const period = selection.kind === 'preset' ? selection.period : '30d'
-  const label = periodLabel(period)
   const summary = useSpendingSummary({ period })
+  // While a new period loads, the previous figures stay on screen (#77), so
+  // the label follows the figures, not the selection (#116).
+  const label = periodLabel(summary.data?.period ?? period)
   // Amounts need the profile's currency, so the cards wait for it (A3).
   const profile = useProfile()
 
@@ -69,6 +72,7 @@ export function SpendingSummary() {
       <div className={styles.heading}>
         <h2 className={styles.title}>Spending summary</h2>
         <p className={styles.period}>{label}</p>
+        {summary.isPlaceholderData && <Updating />}
       </div>
 
       {selection.kind === 'custom' && (

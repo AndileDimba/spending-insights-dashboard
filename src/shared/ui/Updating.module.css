@@ -1,0 +1,7 @@
+.updating {
+  padding: 0 var(--space-2);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+}
