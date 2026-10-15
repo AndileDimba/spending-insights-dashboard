@@ -22,6 +22,7 @@ export interface Summary {
   averageTransaction: Cents
   topCategory: CategoryName | null
   comparedToPrevious: { spentChange: number | null; transactionChange: number | null }
+  refunds: { totalAmount: Cents; transactionCount: number }
 }
 
 export interface CategoryTotal {
@@ -98,12 +99,19 @@ function inMonth(transactions: readonly MockTransaction[], month: string): MockT
   return transactions.filter((transaction) => dayOf(transaction).startsWith(month))
 }
 
-/** Net of refunds, and never negative (A7). */
-function netTotal(transactions: readonly MockTransaction[]): Cents {
-  return Math.max(
-    0,
-    transactions.reduce((total, transaction) => total + transaction.amount, 0),
-  ) as Cents
+// Spending is purchases, and refunds are their own figure (A21). Netting them
+// instead loses a category whose refunds outweigh its purchases, and then the
+// categories no longer add up to the total.
+function purchases(transactions: readonly MockTransaction[]): MockTransaction[] {
+  return transactions.filter((transaction) => transaction.amount > 0)
+}
+
+function refunds(transactions: readonly MockTransaction[]): MockTransaction[] {
+  return transactions.filter((transaction) => transaction.amount < 0)
+}
+
+function total(transactions: readonly MockTransaction[]): Cents {
+  return Math.abs(transactions.reduce((sum, transaction) => sum + transaction.amount, 0)) as Cents
 }
 
 function average(total: Cents, count: number): Cents {
@@ -122,8 +130,10 @@ function change(current: number, previous: number): number | null {
 
 function totalsByCategory(transactions: readonly MockTransaction[]) {
   return CATEGORIES.map((category) => {
-    const items = transactions.filter((transaction) => transaction.category === category.name)
-    return { ...category, amount: netTotal(items), transactionCount: items.length }
+    const items = purchases(transactions).filter(
+      (transaction) => transaction.category === category.name,
+    )
+    return { ...category, amount: total(items), transactionCount: items.length }
   })
 }
 
@@ -134,12 +144,16 @@ export function periodRange(period: Period, today: string): DateRange {
 export function summarise(dataset: MockDataset, period: Period): Summary {
   const range = periodRange(period, dataset.today)
   const days = PERIOD_DAYS[period]
-  const current = between(dataset.transactions, range)
-  const previous = between(dataset.transactions, {
-    startDate: addDays(range.startDate, -days),
-    endDate: addDays(range.startDate, -1),
-  })
-  const totalSpent = netTotal(current)
+  const inRange = between(dataset.transactions, range)
+  const current = purchases(inRange)
+  const previous = purchases(
+    between(dataset.transactions, {
+      startDate: addDays(range.startDate, -days),
+      endDate: addDays(range.startDate, -1),
+    }),
+  )
+  const returned = refunds(inRange)
+  const totalSpent = total(current)
   const top = totalsByCategory(current).reduce<{ name: CategoryName; amount: number } | null>(
     (best, next) => (next.amount > (best?.amount ?? 0) ? next : best),
     null,
@@ -152,9 +166,10 @@ export function summarise(dataset: MockDataset, period: Period): Summary {
     averageTransaction: average(totalSpent, current.length),
     topCategory: top?.name ?? null,
     comparedToPrevious: {
-      spentChange: change(totalSpent, netTotal(previous)),
+      spentChange: change(totalSpent, total(previous)),
       transactionChange: change(current.length, previous.length),
     },
+    refunds: { totalAmount: total(returned), transactionCount: returned.length },
   }
 }
 
@@ -189,8 +204,8 @@ export function monthlyTrends(dataset: MockDataset, months: number): MonthTotal[
   return Array.from({ length: months }, (_, index) => addMonths(currentMonth, index - months + 1))
     .filter((month) => month >= firstMonth)
     .map((month) => {
-      const items = inMonth(dataset.transactions, month)
-      const totalSpent = netTotal(items)
+      const items = purchases(inMonth(dataset.transactions, month))
+      const totalSpent = total(items)
       return {
         month,
         totalSpent,
@@ -205,8 +220,8 @@ export function spendingGoals(dataset: MockDataset): Goal[] {
   const thisMonth = inMonth(dataset.transactions, month)
 
   return GOAL_PLANS.map(({ category, targetUsed }, index) => {
-    const currentSpent = netTotal(
-      thisMonth.filter((transaction) => transaction.category === category),
+    const currentSpent = total(
+      purchases(thisMonth).filter((transaction) => transaction.category === category),
     )
     // Whole hundreds of rand, as a person would set a budget, and never zero.
     // Rounding up keeps a goal under 100% below it, and rounding down keeps an

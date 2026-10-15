@@ -33,7 +33,7 @@ function cents(convert: (value: number) => Cents | undefined, message: string) {
 /** An exact amount, such as a transaction, in integer cents. May be negative (A7). */
 const signedAmount = cents(toCents, 'Expected an amount with at most two decimals (A18)')
 
-/** A total, which is net of refunds and can never be negative (A7). */
+/** A total, which counts purchases only and can never be negative (A7, A21). */
 const amount = signedAmount.refine((value) => value >= 0, 'Totals must not be negative (A7)')
 
 /** An average, which may carry more decimals and is rounded to the nearest cent (A18). */
@@ -84,6 +84,10 @@ export const summarySchema = z.object({
     spentChange: change,
     transactionChange: change,
   }),
+  // Not in the documented contract: proposed so refunds can be shown beside
+  // spending rather than netted from it. Optional, so the documented API
+  // still parses, and the view leaves the figure out (A21).
+  refunds: z.object({ totalAmount: amount, transactionCount: count }).optional(),
 })
 
 const category = z.object({

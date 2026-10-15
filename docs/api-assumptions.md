@@ -14,7 +14,7 @@ Each decision has an ID (A1, A2, ...) so code comments and tests can refer to it
 | A4 | Trends length and coverage | Show the months returned; label partial months |
 | A5 | Error responses | RFC 9457 Problem Details |
 | A6 | Authentication and `customerId` | One mocked signed-in customer; ID never in the app URL |
-| A7 | Refunds and negative amounts | Only transactions may be negative, shown as refunds |
+| A7 | Refunds and negative amounts | Only transactions may be negative, shown as refunds (totals: see A21) |
 | A8 | Goal statuses | Known: `on_track`, `warning`, `exceeded`; anything else neutral |
 | A9 | Invalid query parameters | The client never sends them; the API answers 400 |
 | A10 | Period date ranges | Inclusive calendar days in South African time |
@@ -28,6 +28,7 @@ Each decision has an ID (A1, A2, ...) so code comments and tests can refer to it
 | A18 | Precision of amounts | At most two decimal places |
 | A19 | Example data does not agree across endpoints | Examples show shape only; mocks are consistent |
 | A20 | The summary endpoint takes no date range | Summary cards stay on a preset period and say so when a custom range is chosen |
+| A21 | Purchases and refunds in totals | Totals count purchases only; refunds are a separate figure in the summary |
 
 ## Cross-cutting decisions
 
@@ -91,6 +92,13 @@ Each decision has an ID (A1, A2, ...) so code comments and tests can refer to it
 - **Reasoning:** an honest label is better than numbers that silently disagree with the categories below them.
 - **Question for the backend:** can the summary accept `startDate` and `endDate` like the categories endpoint?
 
+### A21. Purchases and refunds in totals
+
+- **Gap:** the contract does not say whether totals include refunds, or at what level. A7 first made every total net of refunds and never negative. An independent review of v1.0.0 (#115) found what that does: netting each category and flooring it at zero loses a category whose refunds outweigh its purchases in the period, so the categories add up to more than the summary. A R100 Groceries purchase and a R50 Shopping refund gave a summary of R50 and categories of R100.
+- **Decision:** spending is purchases. `totalSpent`, category `amount` and `transactionCount`, trends, budgets and the profile's lifetime total count purchases only, and averages are per purchase, so every total is positive and the categories always add up to the summary. Refunds are a separate figure: the summary gains an optional `refunds` object, `{ "totalAmount": 409.92, "transactionCount": 2 }`, and the overview shows it as its own card. When the API does not send it, the card is left out and the other figures still show. Transactions are unchanged: a refund is a negative amount, shown as money returned.
+- **Reasoning:** purchases and refunds are different things a customer wants to tell apart, the way a bank statement shows money out and money in. Netting has no honest answer for a category with more refunds than purchases: a donut cannot draw a negative slice, and dropping or flooring it makes the figures disagree.
+- **Question for the backend:** can the summary return refunds separately as above, and are `totalSpent` and the category amounts gross purchases? Should a refund count against the budget of the month it was bought in, the month it was refunded, or neither?
+
 ### A2. Categories:  and / together
 
 - **Gap:** `/spending/categories` accepts both a period and a custom range. Precedence is not defined.
@@ -126,7 +134,7 @@ Each decision has an ID (A1, A2, ...) so code comments and tests can refer to it
 ### A7. Transactions: refunds and negative amounts
 
 - **Gap:** refunds, reversals and negative amounts are not mentioned.
-- **Decision:** a transaction `amount` may be negative, meaning money returned (a refund or reversal). It is shown as a credit with a plus sign and a "Refund" label, not just a colour. Totals (summary, categories, trends, goals) are net of refunds and must not be negative; a negative total is rejected as invalid data. The mock data includes a small number of refunds so this path is exercised.
+- **Decision:** a transaction `amount` may be negative, meaning money returned (a refund or reversal). It is shown as a credit with a plus sign and a "Refund" label, not just a colour. Totals must not be negative; a negative total is rejected as invalid data. *Replaced in part by A21:* totals were first net of refunds, and are now purchases only. The mock data includes a small number of refunds so this path is exercised.
 - **Reasoning:** refunds are common in real card data, and a spending screen that cannot show them would eventually show a wrong total.
 - **Question for the backend:** are refunds negative amounts on the original category, or separate transactions of another type?
 

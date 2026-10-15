@@ -13,6 +13,7 @@ import {
 } from '@/shared/api/schemas'
 
 import { CATEGORIES } from './data/catalogue'
+import { generateDataset } from './data/generate'
 import { createHandlers, type MockApiOptions } from './handlers'
 import { server } from './node'
 
@@ -56,6 +57,27 @@ describe('every mock response honours the contract', () => {
 
     expect(status).toBe(200)
     expect(schema.safeParse(body).error?.issues ?? []).toEqual([])
+  })
+})
+
+describe('purchases and refunds (A21)', () => {
+  it('reports the refunds in the summary, in rand', async () => {
+    useMockApi()
+
+    const { body } = await get('/spending/summary')
+
+    expect(body).toMatchObject({ refunds: { totalAmount: expect.any(Number) as number } })
+    expect(summarySchema.parse(body).refunds?.transactionCount).toBeGreaterThan(0)
+  })
+
+  it('gives lifetime spending as the purchases since joining', async () => {
+    useMockApi()
+    const dataset = generateDataset({ seed: 1, now: NOW })
+    const purchases = dataset.transactions
+      .filter((transaction) => transaction.amount > 0)
+      .reduce((total, transaction) => total + transaction.amount, 0)
+
+    expect(profileSchema.parse((await get('/profile')).body).totalSpent).toBe(purchases)
   })
 })
 
