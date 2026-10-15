@@ -9,6 +9,7 @@ How this project is tested, and why. The decision to work test-first is recorded
 3. **Fail closed on bad data.** API responses are untrusted. Tests prove that invalid data produces an error state, never a wrong number on screen.
 4. **Deterministic.** Seeded mock data, a fixed clock and no real network. A flaky test is treated as a bug: fixed or quarantined with an issue the same day, never retried until it passes.
 5. **Coverage is a floor, not a goal.** Mutation testing tells us whether the tests would actually catch a fault.
+6. **Test what the customer sees in between, and across views.** A test that checks only the final figures misses what is on screen while new data loads, and a test per view misses figures that disagree with each other. An independent review of v1.0.0 found both with every test passing: a new period's label over the old figures (#116), and categories that no longer added up to the summary (#115). In-between states are tested by holding a response back, and the figures are checked to reconcile across the summary, categories and transactions for every period.
 
 ## The layers
 

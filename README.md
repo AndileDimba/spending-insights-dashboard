@@ -5,7 +5,7 @@
 
 A responsive dashboard that shows a bank customer's spending: a summary for a chosen period, spending by category, budgets, monthly trends and a filterable list of transactions. The data comes from a mocked API that follows the contract in [`docs/brief/api-spec.md`](docs/brief/api-spec.md).
 
-**Live demo: [insights.dimba.co.za](https://insights.dimba.co.za)**, deployed from `main` ([ADR 0015](docs/adr/0015-demo-on-vercel.md)). The data is generated, seeded and relative to today.
+**Live demo: [insights.dimba.co.za](https://insights.dimba.co.za)**, deployed from `main` ([ADR 0015](docs/adr/0015-demo-on-vercel.md)). The data is generated, seeded and relative to today, and the header says so.
 
 | Desktop | Phone | Phone, dark theme |
 | --- | --- | --- |
@@ -26,13 +26,13 @@ A responsive dashboard that shows a bank customer's spending: a summary for a ch
 
 ## What it does
 
-- **Overview:** the customer's profile, then a period selector (last 7, 30 or 90 days, last year or a custom range) that drives the spending summary and the category breakdown. Each change from the previous period is stated in words, not only by colour or an arrow.
+- **Overview:** the customer's profile, then a period selector (last 7, 30 or 90 days, last year or a custom range) that drives the spending summary and the category breakdown. Purchases and refunds are reported separately, so the summary, the categories and the transactions always add up ([A21](docs/api-assumptions.md#a21-purchases-and-refunds-in-totals)). Each change from the previous period is stated in words, not only by colour or an arrow.
 - **Spending by category:** a donut chart beside the same data as a list, with each category linking to its transactions.
 - **Budgets:** progress against each goal, with its status as a word and an icon as well as a colour.
 - **Monthly spending:** a bar chart over 6, 12 or 24 months, with the figures for each month in a table below it.
 - **Transactions:** a table on wide screens and a list on phones, filtered by category and dates, sorted, and paged 20, 50 or 100 at a time.
 - **Shareable state:** the period, filters, sort and page live in the URL, so a link, a reload or the back button gives the same view.
-- **Every data view has four states:** loading (a skeleton the size of the content), empty, an error with "Try again", and the data.
+- **Every data view has four states:** loading (a skeleton the size of the content), empty, an error with "Try again", and the data. While new data loads, the current figures stay on screen, still labelled with their own period and marked "Updating".
 - **Accessible:** keyboard navigable, with a skip link, visible focus, labelled controls, WCAG AA contrast in both themes, a text or table alternative for every chart, and changes announced to screen readers.
 
 ## Quick start
@@ -98,7 +98,7 @@ The project is built test-first ([ADR 0003](docs/adr/0003-test-driven-developmen
 | Layer | What it proves | Run it with |
 | --- | --- | --- |
 | Static | TypeScript strict with no `any`; ESLint with type-aware, React hooks, accessibility and Testing Library rules; feature boundaries enforced by lint | `npm run typecheck`, `npm run lint` |
-| Unit and contract | Formatting, dates, URL parsing and the data generator are correct at the edges; every example in the API spec and every mock response parses | `npm test` |
+| Unit and contract | Formatting, dates, URL parsing and the data generator are correct at the edges; the summary, categories and transactions reconcile for every period; every example in the API spec and every mock response parses | `npm test` |
 | Component | Each view works in all four states against the mock API, with axe finding no accessibility violations | `npm test` |
 | Security | Injection strings render as text, malformed API data shows an error and never a wrong number, tampered URL parameters fall back to safe values | `npm test`, `npm run test:e2e` |
 | End-to-end | The critical journeys work in desktop Chromium, Chromium at 360px and WebKit as an iPhone, with an axe scan on every page. Any console error, uncaught error or CSP violation fails a test | `npm run test:e2e` |
@@ -188,7 +188,7 @@ Where the API contract left gaps (the sign of a refund, what an unknown goal sta
 
 ### Performance
 
-Each page's code loads on its own and the first page's code is preloaded. CI fails a pull request that takes the app shell over 120 KB of gzipped JavaScript or the dashboard over 250 KB. Lighthouse on a simulated mid-range phone scores 95 for performance and 100 for accessibility on the production image. The [performance report](docs/performance/README.md) has the measurements, and why the demo image, which carries the mock API, scores 90 to 91.
+Each page's code loads on its own and the first page's code is preloaded. CI fails a pull request that takes the app shell over 120 KB of gzipped JavaScript or the dashboard over 250 KB. On a simulated mid-range phone, Lighthouse scores the demo image, which loads its data from the mock API, 90 to 91 for performance and 100 for accessibility. The production image scores 95, but it has no backend, so it was measured showing an error state: it shows how fast the page itself arrives, not a loaded dashboard. The [performance report](docs/performance/README.md) has the measurements.
 
 ## Security
 
