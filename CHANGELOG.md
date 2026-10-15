@@ -10,6 +10,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 - The header says "Demo · simulated data" in builds with the mock API, so the data is never mistaken for real, and the budgets name the month they are for (#118).
 
+### Changed
+
+- The README shows the current app and states the Lighthouse results precisely, and the testing strategy adds testing in-between states and reconciliation across views, the lesson of the review behind this release.
+
 ### Fixed
 
 - Purchases and refunds are reported separately, so the figures always reconcile. A category whose refunds outweighed its purchases used to vanish, and the categories then added up to more than the summary. Spending now counts purchases everywhere, and the summary shows refunds as their own figure (A21) (#115).
