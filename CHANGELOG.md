@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+## [1.1.0] - 2026-10-15
+
+Fixes from an independent review of v1.0.0, which found that figures could disagree across views and that a view could label old figures with a new period, with every test passing. Both are now tested directly.
+
 ### Added
 
 - The header says "Demo · simulated data" in builds with the mock API, so the data is never mistaken for real, and the budgets name the month they are for (#118).
@@ -139,7 +143,8 @@ The first release, covering milestone 0 (Foundations) and milestone 1 (Data laye
 - A mock API on MSW 3: about 18 months of seeded South African transactions, every endpoint derived from one data set so the numbers agree, strict parameter validation with Problem Details, and error, empty and slow scenarios.
 - The mock API runs in the development server and in the demo Docker image (`VITE_ENABLE_MOCKS`). A real build contains no mock code, and CI checks that.
 
-[Unreleased]: https://github.com/AndileDimba/spending-insights-dashboard/compare/v1.0.0...develop
+[Unreleased]: https://github.com/AndileDimba/spending-insights-dashboard/compare/v1.1.0...develop
+[1.1.0]: https://github.com/AndileDimba/spending-insights-dashboard/compare/v1.0.0...v1.1.0
 [1.0.0]: https://github.com/AndileDimba/spending-insights-dashboard/compare/v0.4.0...v1.0.0
 [0.4.0]: https://github.com/AndileDimba/spending-insights-dashboard/compare/v0.3.3...v0.4.0
 [0.3.3]: https://github.com/AndileDimba/spending-insights-dashboard/compare/v0.3.2...v0.3.3
