@@ -9,6 +9,7 @@ import { formatCount, formatDateTime, formatMoney } from '@/shared/lib/format'
 import type { Cents } from '@/shared/lib/money'
 import { ErrorState } from '@/shared/ui/ErrorState'
 import { Skeleton } from '@/shared/ui/Skeleton'
+import { Updating } from '@/shared/ui/Updating'
 import { VisuallyHidden } from '@/shared/ui/VisuallyHidden'
 
 import { TransactionFilters } from './TransactionFilters'
@@ -38,8 +39,10 @@ export function TransactionsView() {
       limit: filters.pageSize,
       offset: (filters.page - 1) * filters.pageSize,
     },
-    // A category from the URL waits for /filters to confirm it (A13).
-    { enabled: filters.ready },
+    // A category from the URL waits for /filters to confirm it (A13). An
+    // inverted range waits to be corrected, rather than widening the list to
+    // every transaction (#117).
+    { enabled: filters.ready && !filters.rangeInverted },
   )
   const resultsHeading = useRef<HTMLHeadingElement>(null)
   const location = useLocation()
@@ -49,15 +52,19 @@ export function TransactionsView() {
   // transaction once.
   const wide = useMediaQuery(WIDE)
 
-  const pending = page.isPending || profile.isPending
+  // A query waiting for the dates to be corrected is not loading.
+  const pending = (page.isPending && !filters.rangeInverted) || profile.isPending
   const failure = page.error ?? profile.error
+  // The previous results stay on screen while new ones load (NFR P7), and
+  // say so, so their count is not read as the new filter's (#116).
+  const updating = page.isPlaceholderData && !filters.rangeInverted
 
   function retry() {
     if (page.isError) void page.refetch()
     if (profile.isError) void profile.refetch()
   }
 
-  const total = page.data?.pagination.total
+  const total = filters.rangeInverted ? undefined : page.data?.pagination.total
 
   // Focus moves to the results, so keyboard and screen reader users start
   // at the new page. The old page stays on screen until it arrives (NFR P7).
@@ -67,7 +74,7 @@ export function TransactionsView() {
   }
 
   return (
-    <section className={styles.view} aria-label="Transactions" aria-busy={pending}>
+    <section className={styles.view} aria-label="Transactions" aria-busy={pending || updating}>
       <TransactionFilters state={filters} />
 
       <div className={styles.resultsHeading}>
@@ -80,9 +87,12 @@ export function TransactionsView() {
             ? ''
             : `${formatCount(total)} ${total === 1 ? 'transaction' : 'transactions'}`}
         </p>
+        {updating && <Updating />}
       </div>
 
-      {failure ? (
+      {filters.rangeInverted ? (
+        <p className={styles.empty}>Correct the dates to see transactions.</p>
+      ) : failure ? (
         <ErrorState
           title="We could not load your transactions"
           message={failure.message}

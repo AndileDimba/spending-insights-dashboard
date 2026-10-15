@@ -132,11 +132,11 @@ const answers: Record<string, Answer> = {
   '/profile': (dataset) => ({
     ...CUSTOMER,
     joinDate: dataset.startDate,
-    // Lifetime spending since joining (A17), net of refunds (A7).
+    // Lifetime spending since joining (A17): purchases, as everywhere (A21).
     totalSpent: rand(
-      Math.max(
+      dataset.transactions.reduce(
+        (total, transaction) => total + Math.max(0, transaction.amount),
         0,
-        dataset.transactions.reduce((total, transaction) => total + transaction.amount, 0),
       ) as Cents,
     ),
   }),
@@ -147,6 +147,7 @@ const answers: Record<string, Answer> = {
       ...summary,
       totalSpent: rand(summary.totalSpent),
       averageTransaction: rand(summary.averageTransaction),
+      refunds: { ...summary.refunds, totalAmount: rand(summary.refunds.totalAmount) },
     }
   },
 

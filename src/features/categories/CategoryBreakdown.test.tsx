@@ -65,7 +65,7 @@ describe('CategoryBreakdown', () => {
     ])
   })
 
-  it('shows each category with its amount, percentage and number of transactions', async () => {
+  it('shows each category with its amount, percentage and number of purchases (A21)', async () => {
     respondWith(categories())
 
     renderWithProviders(<CategoryBreakdown />)
@@ -74,7 +74,7 @@ describe('CategoryBreakdown', () => {
     expect(groceries).toHaveTextContent('Groceries')
     expect(groceries).toHaveTextContent('R 1 250,30')
     expect(groceries).toHaveTextContent('29,4%')
-    expect(groceries).toHaveTextContent('15 transactions')
+    expect(groceries).toHaveTextContent('15 purchases')
   })
 
   it('gives the chart a text summary and the same data as a list, named not coloured', async () => {
@@ -158,7 +158,8 @@ describe('CategoryBreakdown', () => {
   })
 
   // #77: swapping the list for a shorter skeleton shrank the page under the reader.
-  it('keeps the current categories on screen while a new period loads', async () => {
+  // #116: and they say they are updating, so they are not read as the new period's.
+  it('keeps the current categories on screen, saying they are updating, while a new period loads', async () => {
     let answer: () => void = () => undefined
     const answered = new Promise<void>((resolve) => (answer = resolve))
     server.use(
@@ -177,8 +178,10 @@ describe('CategoryBreakdown', () => {
     expect(screen.getByRole('list', { name: 'Categories by amount' })).toBeInTheDocument()
     const region = screen.getByRole('region', { name: 'Spending by category' })
     expect(region).toHaveAttribute('aria-busy', 'true')
+    expect(within(region).getByText('Updating')).toBeInTheDocument()
     answer()
     await waitFor(() => expect(region).toHaveAttribute('aria-busy', 'false'))
+    expect(within(region).queryByText('Updating')).not.toBeInTheDocument()
   })
 
   it('requests the categories again when Retry is selected after an error', async () => {

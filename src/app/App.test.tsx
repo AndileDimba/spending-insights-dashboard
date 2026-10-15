@@ -1,7 +1,7 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { render, screen, waitFor } from '@testing-library/react'
+import { render, screen, waitFor, within } from '@testing-library/react'
 import { createBrowserRouter, RouterProvider } from 'react-router'
-import { beforeAll, beforeEach, describe, expect, it, onTestFinished } from 'vitest'
+import { beforeAll, beforeEach, describe, expect, it, onTestFinished, vi } from 'vitest'
 
 import { createHandlers } from '@/mocks/handlers'
 import { server } from '@/mocks/node'
@@ -54,6 +54,31 @@ describe('first load', () => {
   })
 })
 
+// #118: a reviewer should know at once that the data is not real.
+describe('demo label', () => {
+  it('says the data is simulated in a build with the mock API', async () => {
+    renderRoutes(routes)
+
+    expect(
+      within(screen.getByRole('banner')).getByText('Demo · simulated data'),
+    ).toBeInTheDocument()
+    await screen.findByRole('heading', { level: 1, name: 'Overview' })
+  })
+
+  it('has no such label in a build without the mock API', async () => {
+    vi.stubEnv('DEV', false)
+    vi.stubEnv('VITE_ENABLE_MOCKS', 'false')
+    onTestFinished(() => {
+      vi.unstubAllEnvs()
+    })
+
+    renderRoutes(routes)
+
+    expect(screen.queryByText('Demo · simulated data')).not.toBeInTheDocument()
+    await screen.findByRole('heading', { level: 1, name: 'Overview' })
+  })
+})
+
 describe.each([
   ['/', 'Overview'],
   ['/transactions', 'Transactions'],
@@ -82,7 +107,11 @@ describe('navigation between pages', () => {
     renderRoutes(routes)
 
     await screen.findByRole('heading', { level: 1, name: 'Overview' })
-    expect(document.title).toBe('Overview | Spending Insights')
+    // The page sets the title in an effect, which can run after the heading
+    // appears; until then the previous test's title is still there (#124).
+    await waitFor(() => {
+      expect(document.title).toBe('Overview | Spending Insights')
+    })
     expect(document.body).toHaveFocus()
   })
 

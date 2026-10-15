@@ -6,6 +6,7 @@ import { server } from '@/mocks/node'
 import { goalsSchema, profileSchema } from '@/shared/api/schemas'
 import { first, specExample } from '@/test/api-spec'
 import { expectNoAccessibilityViolations } from '@/test/axe'
+import { fixClock } from '@/test/clock'
 import { renderWithProviders } from '@/test/render'
 
 import { SpendingGoals } from './SpendingGoals'
@@ -34,6 +35,28 @@ function goalCard(category: string) {
 }
 
 describe('SpendingGoals', () => {
+  // #118: budgets are monthly, and the contract has no month field.
+  it('names the month the budgets are for', async () => {
+    fixClock('2024-09-16T10:00:00Z')
+    respondWith(goals())
+
+    renderWithProviders(<SpendingGoals />)
+
+    await goalCard('Entertainment')
+    const region = screen.getByRole('region', { name: 'Budgets, September 2024' })
+    expect(within(region).getByText('September 2024')).toBeInTheDocument()
+  })
+
+  it('takes the month from South African time, not UTC', async () => {
+    // 23:30 on 30 September in UTC is already 1 October in South Africa.
+    fixClock('2024-09-30T23:30:00Z')
+    respondWith(goals())
+
+    renderWithProviders(<SpendingGoals />)
+
+    expect(await screen.findByText('October 2024')).toBeInTheDocument()
+  })
+
   it('shows the amounts, the days left and a progress bar for each goal', async () => {
     respondWith(goals())
 
@@ -114,9 +137,9 @@ describe('SpendingGoals', () => {
 
     renderWithProviders(<SpendingGoals />)
 
-    expect(screen.getByRole('region', { name: 'Budgets' })).toHaveAttribute('aria-busy', 'true')
+    expect(screen.getByRole('region', { name: /^Budgets/ })).toHaveAttribute('aria-busy', 'true')
     await goalCard('Entertainment')
-    expect(screen.getByRole('region', { name: 'Budgets' })).toHaveAttribute('aria-busy', 'false')
+    expect(screen.getByRole('region', { name: /^Budgets/ })).toHaveAttribute('aria-busy', 'false')
   })
 
   it('requests the goals again when Retry is selected after an error', async () => {

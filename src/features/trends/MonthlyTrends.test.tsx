@@ -113,7 +113,7 @@ describe('MonthlyTrends', () => {
     expect(screen.queryByText('Show the figures for each month')).not.toBeInTheDocument()
   })
 
-  it('lists each month with total spent, transactions and average in a table', async () => {
+  it('lists each month with total spent, purchases and average purchase in a table (A21)', async () => {
     respondWith(trends())
     const { user } = renderWithProviders(<MonthlyTrends />)
 
@@ -123,6 +123,10 @@ describe('MonthlyTrends', () => {
     const rows = within(table).getAllByRole('row')
     expect(rows).toHaveLength(7) // a header row and six months
     expect(within(table).getByRole('columnheader', { name: 'Total spent' })).toBeInTheDocument()
+    expect(within(table).getByRole('columnheader', { name: 'Purchases' })).toBeInTheDocument()
+    expect(
+      within(table).getByRole('columnheader', { name: 'Average purchase' }),
+    ).toBeInTheDocument()
     expect(rows[1]).toHaveTextContent('January 2024')
     expect(rows[1]).toHaveTextContent('R 3 890,25')
     expect(rows[1]).toHaveTextContent('42')
@@ -165,7 +169,7 @@ describe('MonthlyTrends', () => {
 
   // #77: swapping the chart for a shorter skeleton shrank the page and
   // scrolled the reader away from the control they had just used.
-  it('keeps the current months on screen while a new range loads', async () => {
+  it('keeps the current months on screen, saying they are updating, while a new range loads', async () => {
     let answer: () => void = () => undefined
     const answered = new Promise<void>((resolve) => (answer = resolve))
     server.use(
@@ -182,8 +186,10 @@ describe('MonthlyTrends', () => {
 
     expect(screen.getByRole('img')).toBeInTheDocument()
     expect(await region()).toHaveAttribute('aria-busy', 'true')
+    expect(within(await region()).getByText('Updating')).toBeInTheDocument()
     answer()
     await waitFor(async () => expect(await region()).toHaveAttribute('aria-busy', 'false'))
+    expect(within(await region()).queryByText('Updating')).not.toBeInTheDocument()
   })
 
   it('requests the months again when Retry is selected after an error', async () => {

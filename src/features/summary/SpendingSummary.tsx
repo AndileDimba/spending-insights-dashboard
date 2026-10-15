@@ -6,6 +6,7 @@ import type { Profile, SpendingSummary as Summary } from '@/shared/api/schemas'
 import { formatCount, formatMoney, formatPercent } from '@/shared/lib/format'
 import { ErrorState } from '@/shared/ui/ErrorState'
 import { Skeleton } from '@/shared/ui/Skeleton'
+import { Updating } from '@/shared/ui/Updating'
 import { VisuallyHidden } from '@/shared/ui/VisuallyHidden'
 
 import styles from './SpendingSummary.module.css'
@@ -41,14 +42,16 @@ function describeChange(
   }
 }
 
-/** Total spent, transactions, average and top category for the selected period. */
+/** Total spent, refunds, purchases, average and top category for the selected period. */
 export function SpendingSummary() {
   const { selection } = usePeriodSelection()
   // The summary endpoint takes no date range, so a custom range keeps it on
   // the default period, with a note saying so (A20).
   const period = selection.kind === 'preset' ? selection.period : '30d'
-  const label = periodLabel(period)
   const summary = useSpendingSummary({ period })
+  // While a new period loads, the previous figures stay on screen (#77), so
+  // the label follows the figures, not the selection (#116).
+  const label = periodLabel(summary.data?.period ?? period)
   // Amounts need the profile's currency, so the cards wait for it (A3).
   const profile = useProfile()
 
@@ -69,6 +72,7 @@ export function SpendingSummary() {
       <div className={styles.heading}>
         <h2 className={styles.title}>Spending summary</h2>
         <p className={styles.period}>{label}</p>
+        {summary.isPlaceholderData && <Updating />}
       </div>
 
       {selection.kind === 'custom' && (
@@ -98,7 +102,7 @@ function Loading() {
     <>
       <VisuallyHidden>Loading your spending summary</VisuallyHidden>
       <div className={styles.cards}>
-        {['total', 'count', 'average', 'top'].map((key) => (
+        {['total', 'refunds', 'count', 'average', 'top'].map((key) => (
           <div key={key} className={styles.card}>
             <Skeleton width="6rem" height="0.875rem" />
             <Skeleton width="8rem" height="1.75rem" />
@@ -111,7 +115,9 @@ function Loading() {
 }
 
 function Cards({ summary, currency }: { summary: Summary; currency: Profile['currency'] }) {
-  if (summary.transactionCount === 0) {
+  // Spending counts purchases, and refunds are their own figure (A21).
+  const { refunds } = summary
+  if (summary.transactionCount === 0 && !refunds?.transactionCount) {
     return <p className={styles.empty}>No spending in this period</p>
   }
 
@@ -123,24 +129,37 @@ function Cards({ summary, currency }: { summary: Summary; currency: Profile['cur
         value={formatMoney(summary.totalSpent, currency)}
         change={describeChange(spentChange, 'more', 'less', 'caution')}
       />
+      {refunds && (
+        <Card
+          label="Refunds"
+          value={formatMoney(refunds.totalAmount, currency)}
+          note={refundCount(refunds.transactionCount)}
+        />
+      )}
       <Card
-        label="Transactions"
+        label="Purchases"
         value={formatCount(summary.transactionCount)}
         change={describeChange(transactionChange, 'more', 'fewer', 'neutral')}
       />
-      <Card label="Average transaction" value={formatMoney(summary.averageTransaction, currency)} />
+      <Card label="Average purchase" value={formatMoney(summary.averageTransaction, currency)} />
       <Card label="Top category" value={summary.topCategory ?? 'None'} />
     </div>
   )
+}
+
+function refundCount(count: number): string {
+  if (count === 0) return 'No refunds'
+  return `${formatCount(count)} ${count === 1 ? 'refund' : 'refunds'}`
 }
 
 interface CardProps {
   label: string
   value: ReactNode
   change?: Change
+  note?: string
 }
 
-function Card({ label, value, change }: CardProps) {
+function Card({ label, value, change, note }: CardProps) {
   const labelId = useId()
   return (
     <div role="group" aria-labelledby={labelId} className={styles.card}>
@@ -152,6 +171,11 @@ function Card({ label, value, change }: CardProps) {
         <p className={styles.change} data-tone={change.tone}>
           {change.direction && <Arrow direction={change.direction} />}
           <span>{change.text}</span>
+        </p>
+      )}
+      {note && (
+        <p className={styles.change} data-tone="neutral">
+          {note}
         </p>
       )}
     </div>

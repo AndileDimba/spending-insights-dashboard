@@ -6,6 +6,24 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+## [1.1.0] - 2026-10-15
+
+Fixes from an independent review of v1.0.0, which found that figures could disagree across views and that a view could label old figures with a new period, with every test passing. Both are now tested directly.
+
+### Added
+
+- The header says "Demo · simulated data" in builds with the mock API, so the data is never mistaken for real, and the budgets name the month they are for (#118).
+
+### Changed
+
+- The README shows the current app and states the Lighthouse results precisely, and the testing strategy adds testing in-between states and reconciliation across views, the lesson of the review behind this release.
+
+### Fixed
+
+- Purchases and refunds are reported separately, so the figures always reconcile. A category whose refunds outweighed its purchases used to vanish, and the categories then added up to more than the summary. Spending now counts purchases everywhere, and the summary shows refunds as their own figure (A21) (#115).
+- While a new period loads, the summary keeps naming the period its figures are for, instead of the new one, and every view that keeps its figures on screen while it updates says "Updating" (#116).
+- An inverted date range on Transactions keeps both dates, so one can be corrected, and the list waits for the correction instead of widening to every transaction (#117).
+
 ## [1.0.0] - 2026-10-14
 
 The first production release, completing milestone 4 (Hardening). Testers confirmed the iPhone fixes from 0.3.2 to 0.4.0 (#74, #95, #99, #108) on real devices.
@@ -125,7 +143,8 @@ The first release, covering milestone 0 (Foundations) and milestone 1 (Data laye
 - A mock API on MSW 3: about 18 months of seeded South African transactions, every endpoint derived from one data set so the numbers agree, strict parameter validation with Problem Details, and error, empty and slow scenarios.
 - The mock API runs in the development server and in the demo Docker image (`VITE_ENABLE_MOCKS`). A real build contains no mock code, and CI checks that.
 
-[Unreleased]: https://github.com/AndileDimba/spending-insights-dashboard/compare/v1.0.0...develop
+[Unreleased]: https://github.com/AndileDimba/spending-insights-dashboard/compare/v1.1.0...develop
+[1.1.0]: https://github.com/AndileDimba/spending-insights-dashboard/compare/v1.0.0...v1.1.0
 [1.0.0]: https://github.com/AndileDimba/spending-insights-dashboard/compare/v0.4.0...v1.0.0
 [0.4.0]: https://github.com/AndileDimba/spending-insights-dashboard/compare/v0.3.3...v0.4.0
 [0.3.3]: https://github.com/AndileDimba/spending-insights-dashboard/compare/v0.3.2...v0.3.3

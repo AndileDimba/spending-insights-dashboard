@@ -139,6 +139,15 @@ describe('refunds and negative amounts (A7)', () => {
       ['categories', 0, 'amount'],
     ],
     [
+      'refunded total',
+      () =>
+        summarySchema.safeParse({
+          ...summary(),
+          refunds: { totalAmount: -1, transactionCount: 1 },
+        }),
+      ['refunds', 'totalAmount'],
+    ],
+    [
       'goal spending',
       () => {
         const payload = goals()
@@ -149,6 +158,21 @@ describe('refunds and negative amounts (A7)', () => {
     ],
   ])('rejects a negative %s', (_name, parse, path) => {
     expect(parse().error?.issues[0]?.path).toEqual(path)
+  })
+})
+
+describe('refunds in the summary (A21)', () => {
+  it('reads the refunded total in cents and the number of refunds', () => {
+    const parsed = summarySchema.parse({
+      ...summary(),
+      refunds: { totalAmount: 409.92, transactionCount: 2 },
+    })
+
+    expect(parsed.refunds).toEqual({ totalAmount: 40992, transactionCount: 2 })
+  })
+
+  it('accepts a summary without refunds, as the documented contract has none', () => {
+    expect(summarySchema.parse(summary()).refunds).toBeUndefined()
   })
 })
 

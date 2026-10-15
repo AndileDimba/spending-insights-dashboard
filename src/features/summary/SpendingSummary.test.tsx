@@ -44,15 +44,15 @@ function card(name: string) {
 }
 
 describe('SpendingSummary', () => {
-  it('shows total spent, number of transactions, average transaction and top category', async () => {
+  it('shows total spent, number of purchases, average purchase and top category (A21)', async () => {
     respondWith(summary())
 
     renderWithProviders(<SpendingSummary />)
 
     await screen.findByRole('group', { name: 'Total spent' })
     expect(card('Total spent')).toHaveTextContent('R 4 250,75')
-    expect(card('Transactions')).toHaveTextContent('47')
-    expect(card('Average transaction')).toHaveTextContent('R 90,44')
+    expect(card('Purchases')).toHaveTextContent('47')
+    expect(card('Average purchase')).toHaveTextContent('R 90,44')
     expect(card('Top category')).toHaveTextContent('Groceries')
   })
 
@@ -68,13 +68,13 @@ describe('SpendingSummary', () => {
     ).toBeInTheDocument()
   })
 
-  it('says the number of transactions went down', async () => {
+  it('says the number of purchases went down', async () => {
     respondWith(summary())
 
     renderWithProviders(<SpendingSummary />)
 
     expect(
-      within(await screen.findByRole('group', { name: 'Transactions' })).getByText(
+      within(await screen.findByRole('group', { name: 'Purchases' })).getByText(
         '3,2% fewer than the previous period',
       ),
     ).toBeInTheDocument()
@@ -116,8 +116,71 @@ describe('SpendingSummary', () => {
     expect(screen.queryByRole('group', { name: 'Total spent' })).not.toBeInTheDocument()
   })
 
-  it('names the period it covers', async () => {
+  it('shows refunds as their own figure, not netted from spending (A21)', async () => {
+    respondWith({ ...summary(), refunds: { totalAmount: 409.92, transactionCount: 2 } })
+
+    renderWithProviders(<SpendingSummary />)
+
+    const refunds = await screen.findByRole('group', { name: 'Refunds' })
+    expect(refunds).toHaveTextContent('R 409,92')
+    expect(refunds).toHaveTextContent('2 refunds')
+    expect(card('Total spent')).toHaveTextContent('R 4 250,75')
+  })
+
+  it('names a single refund in the singular', async () => {
+    respondWith({ ...summary(), refunds: { totalAmount: 50, transactionCount: 1 } })
+
+    renderWithProviders(<SpendingSummary />)
+
+    expect(await screen.findByRole('group', { name: 'Refunds' })).toHaveTextContent('1 refund')
+  })
+
+  it('says when there were no refunds', async () => {
+    respondWith({ ...summary(), refunds: { totalAmount: 0, transactionCount: 0 } })
+
+    renderWithProviders(<SpendingSummary />)
+
+    expect(await screen.findByRole('group', { name: 'Refunds' })).toHaveTextContent('No refunds')
+  })
+
+  it('leaves the refunds out when the API does not send them (A21)', async () => {
     respondWith(summary())
+
+    renderWithProviders(<SpendingSummary />)
+
+    await screen.findByRole('group', { name: 'Total spent' })
+    expect(screen.queryByRole('group', { name: 'Refunds' })).not.toBeInTheDocument()
+  })
+
+  it('shows the refunds of a period with no purchases, not an empty state (A21)', async () => {
+    respondWith({
+      ...summary(),
+      totalSpent: 0,
+      transactionCount: 0,
+      averageTransaction: 0,
+      topCategory: null,
+      refunds: { totalAmount: 50, transactionCount: 1 },
+    })
+
+    renderWithProviders(<SpendingSummary />)
+
+    expect(await screen.findByRole('group', { name: 'Refunds' })).toHaveTextContent('R 50,00')
+    expect(card('Total spent')).toHaveTextContent('R 0,00')
+    expect(screen.queryByText('No spending in this period')).not.toBeInTheDocument()
+  })
+
+  it('shows an error, not a wrong figure, for a malformed refunds total', async () => {
+    respondWith({ ...summary(), refunds: { totalAmount: -50, transactionCount: 1 } })
+
+    renderWithProviders(<SpendingSummary />)
+
+    expect(
+      await screen.findByText('We could not load your spending summary', {}, { timeout: 5000 }),
+    ).toBeInTheDocument()
+  })
+
+  it('names the period it covers', async () => {
+    respondWith({ ...summary(), period: '90d' })
 
     renderWithProviders(<SpendingSummary />, { route: '/?period=90d' })
 
@@ -163,14 +226,17 @@ describe('SpendingSummary', () => {
     )
   })
 
-  // #77: swapping the cards for skeletons shrank the page under the reader.
-  it('keeps the current totals on screen while a new period loads', async () => {
+  // #77: swapping the cards for skeletons shrank the page under the reader,
+  // so the current totals stay. #116: they keep their own period's name, and
+  // say they are updating, so old figures never sit under a new period.
+  it('keeps the current totals, with their own period, while a new period loads', async () => {
     let answer: () => void = () => undefined
     const answered = new Promise<void>((resolve) => (answer = resolve))
     server.use(
       http.get(SUMMARY_URL, async ({ request }) => {
         if (new URL(request.url).searchParams.get('period') === '7d') {
           await answered
+          return HttpResponse.json({ ...summary(), period: '7d', totalSpent: 1000 })
         }
         return HttpResponse.json(summary())
       }),
@@ -180,11 +246,22 @@ describe('SpendingSummary', () => {
 
     await act(() => router.navigate('/?period=7d'))
 
+    const region = screen.getByRole('region', { name: /Spending summary/ })
+    expect(region).toHaveAccessibleName('Spending summary, last 30 days')
+    expect(within(region).getByText('Last 30 days')).toBeInTheDocument()
     expect(card('Total spent')).toHaveTextContent('R 4 250,75')
-    const region = screen.getByRole('region', { name: 'Spending summary, last 7 days' })
+    expect(within(region).getByText('Updating')).toBeInTheDocument()
     expect(region).toHaveAttribute('aria-busy', 'true')
+
     answer()
-    await waitFor(() => expect(region).toHaveAttribute('aria-busy', 'false'))
+
+    await waitFor(() => {
+      expect(card('Total spent')).toHaveTextContent('R 1 000,00')
+    })
+    expect(region).toHaveAccessibleName('Spending summary, last 7 days')
+    expect(within(region).getByText('Last 7 days')).toBeInTheDocument()
+    expect(within(region).queryByText('Updating')).not.toBeInTheDocument()
+    expect(region).toHaveAttribute('aria-busy', 'false')
   })
 
   it('requests the summary again when Retry is selected after an error', async () => {

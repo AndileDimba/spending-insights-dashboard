@@ -1,4 +1,5 @@
-import { screen, within } from '@testing-library/react'
+import { screen, waitFor, within } from '@testing-library/react'
+import { http } from 'msw'
 import { beforeEach, describe, expect, it } from 'vitest'
 
 import { createHandlers } from '@/mocks/handlers'
@@ -104,6 +105,32 @@ describe('TransactionsView filters', () => {
     expect(requested.every((params) => !params.has('category'))).toBe(true)
   })
 
+  // #116: the previous results stay while new ones load, so their count is
+  // marked as updating rather than read as the new filter's.
+  it('says the results are updating while new filters load', async () => {
+    let answer: () => void = () => undefined
+    const answered = new Promise<void>((resolve) => (answer = resolve))
+    server.use(
+      http.get('*/api/customers/12345/transactions', async ({ request }) => {
+        if (new URL(request.url).searchParams.get('category') === 'Groceries') await answered
+        // Nothing returned: the mock API behind this handler answers.
+      }),
+    )
+    const { user } = renderWithProviders(<TransactionsView />)
+    await listedItems()
+    const region = screen.getByRole('region', { name: 'Transactions' })
+
+    await user.selectOptions(await screen.findByLabelText('Category'), 'Groceries')
+
+    expect(await within(region).findByText('Updating')).toBeInTheDocument()
+    expect(region).toHaveAttribute('aria-busy', 'true')
+    answer()
+    await waitFor(() => {
+      expect(within(region).queryByText('Updating')).not.toBeInTheDocument()
+    })
+    expect(region).toHaveAttribute('aria-busy', 'false')
+  })
+
   it('announces the number of results politely', async () => {
     const { user } = renderWithProviders(<TransactionsView />)
     await listedItems()
@@ -125,5 +152,81 @@ describe('TransactionsView filters', () => {
     await user.click(screen.getByRole('button', { name: 'Clear filters' }))
 
     expect(search(router).toString()).toBe('')
+  })
+})
+
+// #117: the fields showed the validated request, which drops an inverted
+// range, so both dates vanished and the list widened to every transaction.
+describe('an inverted date range', () => {
+  const RANGE_ERROR = 'The start date must be on or before the end date. The dates are not applied.'
+
+  it('keeps both dates as entered and says they are not applied', async () => {
+    const { user } = renderWithProviders(<TransactionsView />)
+    await listedItems()
+
+    await user.type(screen.getByLabelText('From'), '2024-09-10')
+    await user.type(screen.getByLabelText('To'), '2024-09-01')
+
+    expect(screen.getByLabelText('From')).toHaveValue('2024-09-10')
+    expect(screen.getByLabelText('To')).toHaveValue('2024-09-01')
+    expect(screen.getByLabelText('To')).toHaveAccessibleDescription(RANGE_ERROR)
+  })
+
+  it('requests nothing while the range is inverted, instead of every transaction', async () => {
+    const { user } = renderWithProviders(<TransactionsView />)
+    await listedItems()
+    await user.type(screen.getByLabelText('From'), '2024-09-10')
+    const before = requested.length
+
+    await user.type(screen.getByLabelText('To'), '2024-09-01')
+
+    expect(await screen.findByText('Correct the dates to see transactions.')).toBeInTheDocument()
+    expect(requested).toHaveLength(before)
+    expect(screen.queryByRole('list', { name: 'Transactions' })).not.toBeInTheDocument()
+  })
+
+  it('applies the range once one date is corrected, without entering the other again', async () => {
+    const { user, router } = renderWithProviders(<TransactionsView />, {
+      route: '/transactions?startDate=2024-09-10&endDate=2024-09-01',
+    })
+    await screen.findByText('Correct the dates to see transactions.')
+
+    await user.clear(screen.getByLabelText('To'))
+    await user.type(screen.getByLabelText('To'), '2024-09-12')
+
+    await listedItems()
+    expect(search(router).get('startDate')).toBe('2024-09-10')
+    expect(requested.at(-1)?.get('startDate')).toBe('2024-09-10')
+    expect(requested.at(-1)?.get('endDate')).toBe('2024-09-12')
+    expect(screen.queryByText(RANGE_ERROR)).not.toBeInTheDocument()
+  })
+
+  it('shows the dates and the error from a shared URL, and requests nothing', async () => {
+    renderWithProviders(<TransactionsView />, {
+      route: '/transactions?startDate=2024-09-10&endDate=2024-09-01',
+    })
+
+    expect(await screen.findByText(RANGE_ERROR)).toBeInTheDocument()
+    expect(screen.getByLabelText('From')).toHaveValue('2024-09-10')
+    expect(screen.getByLabelText('To')).toHaveValue('2024-09-01')
+    expect(screen.getByText('Correct the dates to see transactions.')).toBeInTheDocument()
+    expect(requested).toHaveLength(0)
+    // Waiting for a correction is not loading, so the region stops being busy
+    // once the profile has loaded.
+    const region = screen.getByRole('region', { name: 'Transactions' })
+    await waitFor(() => {
+      expect(region).toHaveAttribute('aria-busy', 'false')
+    })
+  })
+
+  it('still ignores a date that is not a real date (threat T4)', async () => {
+    renderWithProviders(<TransactionsView />, {
+      route: '/transactions?startDate=2024-02-31&endDate=<script>',
+    })
+    await listedItems()
+
+    expect(screen.getByLabelText('From')).toHaveValue('')
+    expect(screen.getByLabelText('To')).toHaveValue('')
+    expect(requested.at(-1)?.has('startDate')).toBe(false)
   })
 })
