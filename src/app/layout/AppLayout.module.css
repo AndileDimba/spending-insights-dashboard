@@ -33,6 +33,22 @@
   padding: var(--space-2) var(--page-gutter);
 }
 
+.identity {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-1) var(--space-3);
+}
+
+/* In the header's own colours, so it keeps the brand's contrast in both themes. */
+.demo {
+  padding: 0 var(--space-2);
+  border: 1px solid currentColor;
+  border-radius: var(--radius-lg);
+  font-size: var(--font-size-sm);
+  white-space: nowrap;
+}
+
 .brand {
   display: flex;
   align-items: center;

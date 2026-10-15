@@ -11,6 +11,14 @@ const NAV_ITEMS = [
   { to: '/transactions', label: 'Transactions' },
 ] as const
 
+/**
+ * Whether this build answers from the mock API, as main.tsx decides (ADR 0008).
+ * Read when rendering, so tests can stub the environment.
+ */
+function usesMockApi(): boolean {
+  return import.meta.env.DEV || import.meta.env.VITE_ENABLE_MOCKS === 'true'
+}
+
 /** Skip link, header with the main navigation, and the main region for the current page. */
 export function AppLayout() {
   const main = useRef<HTMLElement>(null)
@@ -43,14 +51,17 @@ export function AppLayout() {
 
       <header className={styles.header}>
         <div className={styles.headerInner}>
-          <span className={styles.brand}>
-            <svg className={styles.brandMark} viewBox="0 0 32 32" aria-hidden="true">
-              <rect x="5" y="17" width="5" height="10" rx="1" fill="currentColor" />
-              <rect x="13.5" y="11" width="5" height="16" rx="1" fill="currentColor" />
-              <rect x="22" y="5" width="5" height="22" rx="1" fill="currentColor" />
-            </svg>
-            Spending Insights
-          </span>
+          <div className={styles.identity}>
+            <span className={styles.brand}>
+              <svg className={styles.brandMark} viewBox="0 0 32 32" aria-hidden="true">
+                <rect x="5" y="17" width="5" height="10" rx="1" fill="currentColor" />
+                <rect x="13.5" y="11" width="5" height="16" rx="1" fill="currentColor" />
+                <rect x="22" y="5" width="5" height="22" rx="1" fill="currentColor" />
+              </svg>
+              Spending Insights
+            </span>
+            {usesMockApi() && <span className={styles.demo}>Demo · simulated data</span>}
+          </div>
 
           <nav aria-label="Main">
             <ul className={styles.navList}>

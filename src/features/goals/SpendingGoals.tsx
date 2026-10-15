@@ -2,7 +2,8 @@ import { useId } from 'react'
 
 import { useGoals, useProfile } from '@/shared/api/queries'
 import type { Goal, GoalStatus } from '@/shared/api/schemas'
-import { formatMoney, formatPercent } from '@/shared/lib/format'
+import { todayInSouthAfrica } from '@/shared/lib/dates'
+import { formatMoney, formatMonth, formatPercent } from '@/shared/lib/format'
 import { ErrorState } from '@/shared/ui/ErrorState'
 import { Skeleton } from '@/shared/ui/Skeleton'
 import { VisuallyHidden } from '@/shared/ui/VisuallyHidden'
@@ -26,6 +27,10 @@ export function SpendingGoals() {
   // Amounts need the profile's currency (A3).
   const profile = useProfile()
 
+  // Budgets are monthly and the contract has no month field, so they are for
+  // the current month in South Africa (#118, A10).
+  const month = formatMonth(todayInSouthAfrica().slice(0, 7))
+
   const pending = goals.isPending || profile.isPending
   const failure = goals.error ?? profile.error
 
@@ -35,8 +40,11 @@ export function SpendingGoals() {
   }
 
   return (
-    <section className={styles.goals} aria-label="Budgets" aria-busy={pending}>
-      <h2 className={styles.title}>Budgets</h2>
+    <section className={styles.goals} aria-label={`Budgets, ${month}`} aria-busy={pending}>
+      <div className={styles.heading}>
+        <h2 className={styles.title}>Budgets</h2>
+        <p className={styles.month}>{month}</p>
+      </div>
 
       {failure ? (
         <ErrorState
