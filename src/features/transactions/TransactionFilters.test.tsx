@@ -1,4 +1,5 @@
 import { screen, waitFor, within } from '@testing-library/react'
+import { http } from 'msw'
 import { beforeEach, describe, expect, it } from 'vitest'
 
 import { createHandlers } from '@/mocks/handlers'
@@ -102,6 +103,32 @@ describe('TransactionsView filters', () => {
     expect(screen.getByLabelText('Sort by')).toHaveValue('date_desc')
     expect(screen.queryByRole('alert')).not.toBeInTheDocument()
     expect(requested.every((params) => !params.has('category'))).toBe(true)
+  })
+
+  // #116: the previous results stay while new ones load, so their count is
+  // marked as updating rather than read as the new filter's.
+  it('says the results are updating while new filters load', async () => {
+    let answer: () => void = () => undefined
+    const answered = new Promise<void>((resolve) => (answer = resolve))
+    server.use(
+      http.get('*/api/customers/12345/transactions', async ({ request }) => {
+        if (new URL(request.url).searchParams.get('category') === 'Groceries') await answered
+        // Nothing returned: the mock API behind this handler answers.
+      }),
+    )
+    const { user } = renderWithProviders(<TransactionsView />)
+    await listedItems()
+    const region = screen.getByRole('region', { name: 'Transactions' })
+
+    await user.selectOptions(await screen.findByLabelText('Category'), 'Groceries')
+
+    expect(await within(region).findByText('Updating')).toBeInTheDocument()
+    expect(region).toHaveAttribute('aria-busy', 'true')
+    answer()
+    await waitFor(() => {
+      expect(within(region).queryByText('Updating')).not.toBeInTheDocument()
+    })
+    expect(region).toHaveAttribute('aria-busy', 'false')
   })
 
   it('announces the number of results politely', async () => {
