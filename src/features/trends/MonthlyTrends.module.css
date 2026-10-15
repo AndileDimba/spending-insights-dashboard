@@ -15,6 +15,13 @@
   gap: var(--space-2) var(--space-4);
 }
 
+/* Keeps the updating note beside the title, not between it and the range. */
+.titleGroup {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-3);
+}
+
 .title {
   font-size: var(--font-size-lg);
 }

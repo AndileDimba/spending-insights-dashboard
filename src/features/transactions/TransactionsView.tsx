@@ -9,6 +9,7 @@ import { formatCount, formatDateTime, formatMoney } from '@/shared/lib/format'
 import type { Cents } from '@/shared/lib/money'
 import { ErrorState } from '@/shared/ui/ErrorState'
 import { Skeleton } from '@/shared/ui/Skeleton'
+import { Updating } from '@/shared/ui/Updating'
 import { VisuallyHidden } from '@/shared/ui/VisuallyHidden'
 
 import { TransactionFilters } from './TransactionFilters'
@@ -54,6 +55,9 @@ export function TransactionsView() {
   // A query waiting for the dates to be corrected is not loading.
   const pending = (page.isPending && !filters.rangeInverted) || profile.isPending
   const failure = page.error ?? profile.error
+  // The previous results stay on screen while new ones load (NFR P7), and
+  // say so, so their count is not read as the new filter's (#116).
+  const updating = page.isPlaceholderData && !filters.rangeInverted
 
   function retry() {
     if (page.isError) void page.refetch()
@@ -70,7 +74,7 @@ export function TransactionsView() {
   }
 
   return (
-    <section className={styles.view} aria-label="Transactions" aria-busy={pending}>
+    <section className={styles.view} aria-label="Transactions" aria-busy={pending || updating}>
       <TransactionFilters state={filters} />
 
       <div className={styles.resultsHeading}>
@@ -83,6 +87,7 @@ export function TransactionsView() {
             ? ''
             : `${formatCount(total)} ${total === 1 ? 'transaction' : 'transactions'}`}
         </p>
+        {updating && <Updating />}
       </div>
 
       {filters.rangeInverted ? (

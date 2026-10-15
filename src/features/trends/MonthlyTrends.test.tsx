@@ -169,7 +169,7 @@ describe('MonthlyTrends', () => {
 
   // #77: swapping the chart for a shorter skeleton shrank the page and
   // scrolled the reader away from the control they had just used.
-  it('keeps the current months on screen while a new range loads', async () => {
+  it('keeps the current months on screen, saying they are updating, while a new range loads', async () => {
     let answer: () => void = () => undefined
     const answered = new Promise<void>((resolve) => (answer = resolve))
     server.use(
@@ -186,8 +186,10 @@ describe('MonthlyTrends', () => {
 
     expect(screen.getByRole('img')).toBeInTheDocument()
     expect(await region()).toHaveAttribute('aria-busy', 'true')
+    expect(within(await region()).getByText('Updating')).toBeInTheDocument()
     answer()
     await waitFor(async () => expect(await region()).toHaveAttribute('aria-busy', 'false'))
+    expect(within(await region()).queryByText('Updating')).not.toBeInTheDocument()
   })
 
   it('requests the months again when Retry is selected after an error', async () => {
