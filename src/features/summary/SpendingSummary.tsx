@@ -41,7 +41,7 @@ function describeChange(
   }
 }
 
-/** Total spent, transactions, average and top category for the selected period. */
+/** Total spent, refunds, purchases, average and top category for the selected period. */
 export function SpendingSummary() {
   const { selection } = usePeriodSelection()
   // The summary endpoint takes no date range, so a custom range keeps it on
@@ -98,7 +98,7 @@ function Loading() {
     <>
       <VisuallyHidden>Loading your spending summary</VisuallyHidden>
       <div className={styles.cards}>
-        {['total', 'count', 'average', 'top'].map((key) => (
+        {['total', 'refunds', 'count', 'average', 'top'].map((key) => (
           <div key={key} className={styles.card}>
             <Skeleton width="6rem" height="0.875rem" />
             <Skeleton width="8rem" height="1.75rem" />
@@ -111,7 +111,9 @@ function Loading() {
 }
 
 function Cards({ summary, currency }: { summary: Summary; currency: Profile['currency'] }) {
-  if (summary.transactionCount === 0) {
+  // Spending counts purchases, and refunds are their own figure (A21).
+  const { refunds } = summary
+  if (summary.transactionCount === 0 && !refunds?.transactionCount) {
     return <p className={styles.empty}>No spending in this period</p>
   }
 
@@ -123,12 +125,19 @@ function Cards({ summary, currency }: { summary: Summary; currency: Profile['cur
         value={formatMoney(summary.totalSpent, currency)}
         change={describeChange(spentChange, 'more', 'less', 'caution')}
       />
+      {refunds && (
+        <Card
+          label="Refunds"
+          value={formatMoney(refunds.totalAmount, currency)}
+          note={`${formatCount(refunds.transactionCount)} ${refunds.transactionCount === 1 ? 'refund' : 'refunds'}`}
+        />
+      )}
       <Card
-        label="Transactions"
+        label="Purchases"
         value={formatCount(summary.transactionCount)}
         change={describeChange(transactionChange, 'more', 'fewer', 'neutral')}
       />
-      <Card label="Average transaction" value={formatMoney(summary.averageTransaction, currency)} />
+      <Card label="Average purchase" value={formatMoney(summary.averageTransaction, currency)} />
       <Card label="Top category" value={summary.topCategory ?? 'None'} />
     </div>
   )
@@ -138,9 +147,10 @@ interface CardProps {
   label: string
   value: ReactNode
   change?: Change
+  note?: string
 }
 
-function Card({ label, value, change }: CardProps) {
+function Card({ label, value, change, note }: CardProps) {
   const labelId = useId()
   return (
     <div role="group" aria-labelledby={labelId} className={styles.card}>
@@ -152,6 +162,11 @@ function Card({ label, value, change }: CardProps) {
         <p className={styles.change} data-tone={change.tone}>
           {change.direction && <Arrow direction={change.direction} />}
           <span>{change.text}</span>
+        </p>
+      )}
+      {note && (
+        <p className={styles.change} data-tone="neutral">
+          {note}
         </p>
       )}
     </div>
