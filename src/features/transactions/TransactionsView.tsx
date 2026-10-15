@@ -38,8 +38,10 @@ export function TransactionsView() {
       limit: filters.pageSize,
       offset: (filters.page - 1) * filters.pageSize,
     },
-    // A category from the URL waits for /filters to confirm it (A13).
-    { enabled: filters.ready },
+    // A category from the URL waits for /filters to confirm it (A13). An
+    // inverted range waits to be corrected, rather than widening the list to
+    // every transaction (#117).
+    { enabled: filters.ready && !filters.rangeInverted },
   )
   const resultsHeading = useRef<HTMLHeadingElement>(null)
   const location = useLocation()
@@ -49,7 +51,8 @@ export function TransactionsView() {
   // transaction once.
   const wide = useMediaQuery(WIDE)
 
-  const pending = page.isPending || profile.isPending
+  // A query waiting for the dates to be corrected is not loading.
+  const pending = (page.isPending && !filters.rangeInverted) || profile.isPending
   const failure = page.error ?? profile.error
 
   function retry() {
@@ -57,7 +60,7 @@ export function TransactionsView() {
     if (profile.isError) void profile.refetch()
   }
 
-  const total = page.data?.pagination.total
+  const total = filters.rangeInverted ? undefined : page.data?.pagination.total
 
   // Focus moves to the results, so keyboard and screen reader users start
   // at the new page. The old page stays on screen until it arrives (NFR P7).
@@ -82,7 +85,9 @@ export function TransactionsView() {
         </p>
       </div>
 
-      {failure ? (
+      {filters.rangeInverted ? (
+        <p className={styles.empty}>Correct the dates to see transactions.</p>
+      ) : failure ? (
         <ErrorState
           title="We could not load your transactions"
           message={failure.message}

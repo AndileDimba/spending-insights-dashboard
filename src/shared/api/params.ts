@@ -50,6 +50,11 @@ function wholeNumber(value: unknown, min: number, max: number, fallback: number)
   return Math.min(max, Math.max(min, number))
 }
 
+/** A real calendar date as YYYY-MM-DD, or undefined for anything else. */
+export function parseDate(value: unknown): string | undefined {
+  return date.parse(value)
+}
+
 /** Both dates, if both are valid and the range does not end before it starts. */
 function dateRange(startInput: unknown, endInput: unknown) {
   const startDate = date.parse(startInput)
