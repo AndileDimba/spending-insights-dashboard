@@ -20,7 +20,7 @@ ARG VITE_ENABLE_MOCKS=true
 RUN npm run build
 
 # ---- Runtime: static files served by unprivileged nginx (ADR 0012) --------
-FROM nginxinc/nginx-unprivileged:alpine-slim@sha256:1517d8c358e2e093957ebee087afa9eb19a32f5d7ecb711b7429e369cb998224
+FROM nginxinc/nginx-unprivileged:alpine-slim@sha256:a8cb0f33d51fa107c96fd2bd3a71aaf564ec131e9d2bdf8700944f0ed8b170d7
 
 LABEL org.opencontainers.image.title="spending-insights-dashboard" \
       org.opencontainers.image.description="Customer spending insights dashboard" \
